@@ -11,4 +11,14 @@ Hermes firmware through at least 2.9.
 It is not compatible with the new-format protocol that may
 be released for Hermes probably in late 2014 or 2015.
 
+To build:
+
+mkdir build
+cd build
+cmake ../
+make
+sudo make install
+sudo ldconfig
+
+
 
