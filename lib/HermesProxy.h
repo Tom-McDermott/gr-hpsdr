@@ -94,7 +94,14 @@ public:
 	unsigned char RxAtten;		// not yet used (requires Hermes firmware V2.0)
 
 	unsigned int ClockSource;	// upper 6-bits of clock control register
-	unsigned int AlexControl;	// 32 bits of Alex control word
+
+//	unsigned int AlexControl;	// 32 bits of Alex control word (old branch code)
+
+	unsigned AlexRxAnt;		// Select Alex Receive Antenna or from T/R relay
+	unsigned AlexTxAnt;		// Select Alex Tx Antenna
+	unsigned AlexManFiltSel;	// Enable Manual Alex Filter Selection
+	unsigned AlexRxHPF;		// Select Alex Receive High Pass Filter
+	unsigned AlexTxLPF;		// Select Alex Transmit Low Pass Filter
 
 	int PTTMode;
 	bool RxPreamp;
@@ -113,7 +120,8 @@ public:
 	HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
-			 const char * ClkS, const char * AlexC, int NumRx);	// constructor
+			 const char * ClkS, int AlexRA, int AlexTA,
+			 int AlexMan, int AlexHPF, int AlexRPF, int NumRx);	// constructor
 
 	~HermesProxy();			// destructor
 

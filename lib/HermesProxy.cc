@@ -54,7 +54,8 @@
 HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
-			 const char * ClkS, const char * AlexC, int NumRx)	// constructor
+			 const char * ClkS, int AlexRA, int AlexTA,
+			 int AlexMan, int AlexHPF, int AlexLPF, int NumRx)	// constructor
 {
 
 
@@ -87,9 +88,14 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 	sscanf(ClkS, "%x", &cs);
 	ClockSource = (cs & 0xFC);
 
-	unsigned int ac;		// Convert AlexControl string to unsigned, then initialize
-	sscanf(AlexC, "%x", &ac);
-	AlexControl = ac;
+//	Initialize the 5 Alex control registers.
+
+	AlexRxAnt = AlexRA;		// Select Alex Receive Antenna or from T/R relay
+	AlexTxAnt = AlexTA;		// Select Alex Tx Antenna
+	AlexManFiltSel = AlexMan;	// Enable Manual Alex Filter Selection
+	AlexRxHPF = AlexHPF;		// Select Alex Receive High Pass Filter
+	AlexTxLPF = AlexLPF;		// Select Alex Transmit Low Pass Filter
+
 
 	Receive0Frequency = (unsigned)RxFreq0;
 	Receive1Frequency = (unsigned)RxFreq1; 
@@ -668,7 +674,7 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    if(RxSampleRate == 48000)
 		Speed |= 0x00;
 
-	    RxCtrl = ((AlexControl & 0x00010000) >> 16);
+	    RxCtrl = 0x00;
 	    if(RxPreamp)
 		RxCtrl |= 0x04;
 	    if(ADCdither)
@@ -681,19 +687,23 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    if(Duplex)
 		Ctrl4 |= 0x04;
 
-	    outbuf[4] = Speed;				// C1
-	    outbuf[5] = ((AlexControl & 0xc0000000) >> 24); // C2
-	    outbuf[6] = RxCtrl;				// C3
-	    outbuf[7] = Ctrl4;				// C4 - #Rx, Duplex
+	    unsigned char RxSel;
+	    RxSel = (AlexRxAnt >> 5) & 0xC0;
+	    unsigned char TxSel;
+	    TxSel = AlexTxAnt & 0x03;
 
-            break;
+	    outbuf[4] = Speed;				// C1
+	    outbuf[5] = 0x00;				// C2
+	    outbuf[6] = RxCtrl | RxSel;			// C3
+	    outbuf[7] = Ctrl4 | TxSel;			// C4 - #Rx, Duplex
+          break;
 
 	  case 2:					// Tx NCO freq (and Rx1 NCO for special case)
 	    outbuf[4] = ((unsigned char)(TransmitFrequency >> 24)) & 0xff;	// c1 RxFreq MSB
 	    outbuf[5] = ((unsigned char)(TransmitFrequency >> 16)) & 0xff;	// c2
 	    outbuf[6] = ((unsigned char)(TransmitFrequency >> 8)) & 0xff;	// c3
 	    outbuf[7] = ((unsigned char)(TransmitFrequency)) & 0xff;		// c4 RxFreq LSB
-           break;
+          break;
 
 	  case 4:					// Rx1 NCO freq
 	    outbuf[4] = ((unsigned char)(Receive0Frequency >> 24)) & 0xff;	// c1 RxFreq MSB
@@ -724,11 +734,11 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    if (PTTOffMutesTx & (PTTMode == PTTOff))
 		outbuf[4] = 0;				// (almost) kill Tx when PTTOff and PTTControlsTx
 	    else
-		outbuf[4] = TxDrive;
+		outbuf[4] = TxDrive;			// c1
 
-	    outbuf[5] = 0;				// Apollo selections
-	    outbuf[6] = ((AlexControl & 0xff00) >> 8);	// Alex filter selections 1
-	    outbuf[7] = (AlexControl & 0xff);		// Alex filter selections 2
+	    outbuf[5] = (AlexManFiltSel >> 6) & 0x40;	// c2 - Alex Manual filter control
+	    outbuf[6] = AlexRxHPF & 0x7f;		// c3 - Alex HPF filter selection
+	    outbuf[7] = AlexTxLPF & 0x7f;		// c4 - Alex LPF filter selection
 	  break;
 
 	  case 20:					// Hermes input attenuator setting

@@ -95,10 +95,118 @@
     <type>raw</type>
   </param>
   <param>
-    <name>Alex Control</name>
-    <key>AlexC</key>
-    <value>"0x00000000"</value>
-    <type>raw</type>
+    <name>Alex Tx Antenna Control</name>
+    <key>AlexTA</key>
+    <value>0</value>
+    <type>enum</type>
+    <option>
+      <name>Tx1</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>Tx2</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>Tx3</name>
+      <key>2</key>
+    </option>
+  </param>
+  <param>
+    <name>Alex Rx Antenna Control</name>
+    <key>AlexRA</key>
+    <value>0</value>
+    <type>enum</type>
+    <option>
+      <name>T/R Relay</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>Rx1</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>Rx2</name>
+      <key>2</key>
+    </option>
+    <option>
+      <name>RxXvrtr</name>
+      <key>3</key>
+    </option>
+  </param>
+  <param>
+    <name>Alex Manual Control</name>
+    <key>AlexMan</key>
+    <value>0</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Alex Rx HPF Selection</name>
+    <key>AlexHPF</key>
+    <value>0</value>
+    <type>enum</type>
+    <option>
+      <name>Bypass</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>1.5 MHz HPF</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>6.5 MHz HPF</name>
+      <key>2</key>
+    </option>
+    <option>
+      <name>9.5 MHz HPF</name>
+      <key>3</key>
+    </option>
+    <option>
+      <name>13 MHz HPF</name>
+      <key>4</key>
+    </option>
+    <option>
+      <name>20 MHz HPF</name>
+      <key>5</key>
+    </option>
+    <option>
+      <name>6M LNA enable</name>
+      <key>6</key>
+    </option>
+  </param>
+  <param>
+    <name>Alex Tx LPF Selection</name>
+    <key>AlexLPF</key>
+    <value>6</value>
+    <type>enum</type>
+    <option>
+      <name>160m LPF</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>80m LPF</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>60/40m LPF</name>
+      <key>2</key>
+    </option>
+    <option>
+      <name>30/20m LPF</name>
+      <key>3</key>
+    </option>
+    <option>
+      <name>17/15m LPF</name>
+      <key>4</key>
+    </option>
+    <option>
+      <name>12/10m LPF</name>
+      <key>5</key>
+    </option>
+    <option>
+      <name>6m LPF</name>
+      <key>6</key>
+    </option>
   </param>
 
 <check>$num_outputs >= 1</check> 
