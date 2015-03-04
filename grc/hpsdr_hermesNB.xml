@@ -4,7 +4,7 @@
   <key>hpsdr_hermesNB</key>
   <category>hpsdr</category>
   <import>import hpsdr</import>
-  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexC, $num_outputs)</make>
+  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexManC, $AlexHPF, $AlexLPF, $num_outputs)</make>
   <callback>set_Receive0Frequency($Rx0F)</callback>
   <callback>set_Receive1Frequency($Rx1F)</callback>
   <callback>set_RxSampRate($RxSmp)</callback>
@@ -15,8 +15,11 @@
   <callback>set_TxDrive($TxDrive)</callback>
   <callback>set_TransmitFrequency($TxF)</callback>
   <callback>set_ClockSource($CkS)</callback>
-  <callback>set_AlexControl($AlexC)</callback>
-
+  <callback>set_AlexRxAntenna($AlexRA)</callback>
+  <callback>set_AlexTxAntenna($AlexTA)</callback>
+  <callback>set_AlexManualFilterSelect($AlexManC)</callback>
+  <callback>set_AlexRxHPF($AlexHPF)</callback>
+  <callback>set_AlexTxLPF($AlexLPF)</callback>
  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
