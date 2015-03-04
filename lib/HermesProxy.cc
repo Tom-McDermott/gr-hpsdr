@@ -687,15 +687,10 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    if(Duplex)
 		Ctrl4 |= 0x04;
 
-	    unsigned char RxSel;
-	    RxSel = (AlexRxAnt >> 5) & 0xC0;
-	    unsigned char TxSel;
-	    TxSel = AlexTxAnt & 0x03;
-
 	    outbuf[4] = Speed;				// C1
 	    outbuf[5] = 0x00;				// C2
-	    outbuf[6] = RxCtrl | RxSel;			// C3
-	    outbuf[7] = Ctrl4 | TxSel;			// C4 - #Rx, Duplex
+	    outbuf[6] = RxCtrl | AlexRxAnt;		// C3
+	    outbuf[7] = Ctrl4 | AlexTxAnt;			// C4 - #Rx, Duplex
           break;
 
 	  case 2:					// Tx NCO freq (and Rx1 NCO for special case)

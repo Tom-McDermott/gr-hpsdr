@@ -95,13 +95,11 @@ public:
 
 	unsigned int ClockSource;	// upper 6-bits of clock control register
 
-//	unsigned int AlexControl;	// 32 bits of Alex control word (old branch code)
-
-	unsigned AlexRxAnt;		// Select Alex Receive Antenna or from T/R relay
-	unsigned AlexTxAnt;		// Select Alex Tx Antenna
-	unsigned AlexManFiltSel;	// Enable Manual Alex Filter Selection
-	unsigned AlexRxHPF;		// Select Alex Receive High Pass Filter
-	unsigned AlexTxLPF;		// Select Alex Transmit Low Pass Filter
+	unsigned char AlexRxAnt;	// Select Alex Receive Antenna or from T/R relay
+	unsigned char AlexTxAnt;	// Select Alex Tx Antenna
+	unsigned char AlexManFiltSel;	// Enable Manual Alex Filter Selection
+	unsigned char AlexRxHPF;	// Select Alex Receive High Pass Filter
+	unsigned char AlexTxLPF;	// Select Alex Transmit Low Pass Filter
 
 	int PTTMode;
 	bool RxPreamp;
