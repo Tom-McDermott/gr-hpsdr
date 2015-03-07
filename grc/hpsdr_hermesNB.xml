@@ -139,7 +139,7 @@
   </param>
   <param>
     <name>Alex Manual Control</name>
-    <key>AlexMan</key>
+    <key>AlexManC</key>
     <value>0</value>
     <type>int</type>
   </param>

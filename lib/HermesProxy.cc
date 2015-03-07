@@ -731,7 +731,7 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    else
 		outbuf[4] = TxDrive;			// c1
 
-	    outbuf[5] = (AlexManFiltSel >> 6) & 0x40;	// c2 - Alex Manual filter control
+	    outbuf[5] = (AlexManFiltSel << 6) & 0x40;	// c2 - Alex Manual filter control
 	    outbuf[6] = AlexRxHPF & 0x7f;		// c3 - Alex HPF filter selection
 	    outbuf[7] = AlexTxLPF & 0x7f;		// c4 - Alex LPF filter selection
 	  break;

@@ -150,27 +150,27 @@ void hermesNB::set_ClockSource(const char * ClkS)	// callback to set Clock sourc
 	Hermes->ClockSource = ck;
     }
 
-void set_AlexRxAntenna(int RxA)		// callback to set Alex Rx Antenna Selector
+void hermesNB::set_AlexRxAntenna(int RxA)		// callback to set Alex Rx Antenna Selector
 {
 	Hermes->AlexRxAnt = RxA;
 }
 
-void set_AlexTxAntenna(int TxA)		// callback to set Alex Tx Antenna Selector
+void hermesNB::set_AlexTxAntenna(int TxA)		// callback to set Alex Tx Antenna Selector
 {
 	Hermes->AlexTxAnt = TxA;
 }
 
-void set_AlexManualFilterSelect(int Man) // callback to enable Manual Alex HPFLPF filter selection
+void hermesNB::set_AlexManualFilterSelect(int Man) // callback to enable Manual Alex HPFLPF filter selection
 {
 	Hermes->AlexManFiltSel = Man;
 }
 
-void set_AlexRxHPF(int HPF)		// callback to select Alex Rx High Pass Filter
+void hermesNB::set_AlexRxHPF(int HPF)		// callback to select Alex Rx High Pass Filter
 {
 	Hermes->AlexRxHPF = HPF;
 }
 
-void set_AlexTxLPF(int LPF)		// callback to set Alex Tx Low Pass filter
+void hermesNB::set_AlexTxLPF(int LPF)		// callback to set Alex Tx Low Pass filter
 {
 	Hermes->AlexTxLPF = LPF;
 }
