@@ -50,7 +50,7 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexMan, int AlexHPF, int AlexLPF, int NumRx);
+			 int AlexHPF, int AlexLPF, int NumRx);
 
       void set_Receive0Frequency(float);	// callback
       void set_Receive1Frequency(float);	// callback
@@ -67,10 +67,8 @@ namespace gr {
 //
       void set_AlexRxAntenna(int);		// callback
       void set_AlexTxAntenna(int);		// callback
-      void set_AlexManualFilterSelect(int);	// callback
       void set_AlexRxHPF(int);			// callback
       void set_AlexTxLPF(int);			// callback
-
 
       bool stop();				// override
       bool start();				// override

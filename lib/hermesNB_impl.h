@@ -57,7 +57,7 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexMan, int AlexHPF, int AlexLPF, int NumRx);
+			 int AlexHPF, int AlexLPF, int NumRx);
       ~hermesNB_impl();
 
       // Where all the action really happens

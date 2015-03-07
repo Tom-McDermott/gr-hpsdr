@@ -55,7 +55,7 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexMan, int AlexHPF, int AlexLPF, int NumRx)	// constructor
+			 int AlexHPF, int AlexLPF, int NumRx)	// constructor
 {
 
 
@@ -92,7 +92,6 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 
 	AlexRxAnt = AlexRA;		// Select Alex Receive Antenna or from T/R relay
 	AlexTxAnt = AlexTA;		// Select Alex Tx Antenna
-	AlexManFiltSel = AlexMan;	// Enable Manual Alex Filter Selection
 	AlexRxHPF = AlexHPF;		// Select Alex Receive High Pass Filter
 	AlexTxLPF = AlexLPF;		// Select Alex Transmit Low Pass Filter
 
@@ -690,7 +689,7 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    outbuf[4] = Speed;				// C1
 	    outbuf[5] = 0x00;				// C2
 	    outbuf[6] = RxCtrl | AlexRxAnt;		// C3
-	    outbuf[7] = Ctrl4 | AlexTxAnt;			// C4 - #Rx, Duplex
+	    outbuf[7] = Ctrl4 | AlexTxAnt;		// C4 - #Rx, Duplex
           break;
 
 	  case 2:					// Tx NCO freq (and Rx1 NCO for special case)
@@ -731,7 +730,7 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    else
 		outbuf[4] = TxDrive;			// c1
 
-	    outbuf[5] = (AlexManFiltSel << 6) & 0x40;	// c2 - Alex Manual filter control
+	    outbuf[5] = 0x40;				// c2 - Alex Manual filter control enabled
 	    outbuf[6] = AlexRxHPF & 0x7f;		// c3 - Alex HPF filter selection
 	    outbuf[7] = AlexTxLPF & 0x7f;		// c4 - Alex LPF filter selection
 	  break;

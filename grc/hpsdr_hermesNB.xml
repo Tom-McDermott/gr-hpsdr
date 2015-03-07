@@ -4,7 +4,7 @@
   <key>hpsdr_hermesNB</key>
   <category>hpsdr</category>
   <import>import hpsdr</import>
-  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexManC, $AlexHPF, $AlexLPF, $num_outputs)</make>
+  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexHPF, $AlexLPF, $num_outputs)</make>
   <callback>set_Receive0Frequency($Rx0F)</callback>
   <callback>set_Receive1Frequency($Rx1F)</callback>
   <callback>set_RxSampRate($RxSmp)</callback>
@@ -17,7 +17,6 @@
   <callback>set_ClockSource($CkS)</callback>
   <callback>set_AlexRxAntenna($AlexRA)</callback>
   <callback>set_AlexTxAntenna($AlexTA)</callback>
-  <callback>set_AlexManualFilterSelect($AlexManC)</callback>
   <callback>set_AlexRxHPF($AlexHPF)</callback>
   <callback>set_AlexTxLPF($AlexLPF)</callback>
  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
@@ -98,7 +97,7 @@
     <type>raw</type>
   </param>
   <param>
-    <name>Alex Tx Antenna Control</name>
+    <name>Alex Tx Antenna</name>
     <key>AlexTA</key>
     <value>0</value>
     <type>enum</type>
@@ -116,7 +115,7 @@
     </option>
   </param>
   <param>
-    <name>Alex Rx Antenna Control</name>
+    <name>Alex Rx Antenna</name>
     <key>AlexRA</key>
     <value>0</value>
     <type>enum</type>
@@ -138,13 +137,7 @@
     </option>
   </param>
   <param>
-    <name>Alex Manual Control</name>
-    <key>AlexManC</key>
-    <value>0</value>
-    <type>int</type>
-  </param>
-  <param>
-    <name>Alex Rx HPF Selection</name>
+    <name>Alex Rx HPF</name>
     <key>AlexHPF</key>
     <value>0x20</value>
     <type>enum</type>
@@ -178,7 +171,7 @@
     </option>
   </param>
   <param>
-    <name>Alex Tx LPF Selection</name>
+    <name>Alex Tx LPF</name>
     <key>AlexLPF</key>
     <value>0x10</value>
     <type>enum</type>

@@ -97,7 +97,6 @@ public:
 
 	unsigned char AlexRxAnt;	// Select Alex Receive Antenna or from T/R relay
 	unsigned char AlexTxAnt;	// Select Alex Tx Antenna
-	unsigned char AlexManFiltSel;	// Enable Manual Alex Filter Selection
 	unsigned char AlexRxHPF;	// Select Alex Receive High Pass Filter
 	unsigned char AlexTxLPF;	// Select Alex Transmit Low Pass Filter
 
@@ -119,7 +118,7 @@ public:
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexMan, int AlexHPF, int AlexRPF, int NumRx);	// constructor
+			 int AlexHPF, int AlexRPF, int NumRx);	// constructor
 
 	~HermesProxy();			// destructor
 
