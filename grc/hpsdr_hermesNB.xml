@@ -139,9 +139,13 @@
   <param>
     <name>Alex Rx HPF</name>
     <key>AlexHPF</key>
-    <value>0x20</value>
+    <value>0x00</value>
     <type>enum</type>
-    <option>
+   <option>
+      <name>AutoTrack Rx0Freq</name>
+      <key>0x00</key>
+    </option>
+     <option>
       <name>Bypass</name>
       <key>0x20</key>
     </option>
@@ -166,15 +170,19 @@
       <key>0x02</key>
     </option>
     <option>
-      <name>6M LNA enable</name>
+      <name>6M BPF+LNA</name>
       <key>0x40</key>
     </option>
   </param>
   <param>
     <name>Alex Tx LPF</name>
     <key>AlexLPF</key>
-    <value>0x10</value>
+    <value>0x00</value>
     <type>enum</type>
+    <option>
+      <name>AutoTrack TxFreq</name>
+      <key>0x00</key>
+    </option>
     <option>
       <name>160m LPF</name>
       <key>0x08</key>
@@ -249,8 +257,8 @@
     Example: "0xfc" {including quote marks}
   *Alex Tx Ant = selects transmit antenna (Tx1, Tx2, or Tx3).
   *Alex Rx ant = selects receive antenna connector, or Tx antenna via T/R relay.
-  *Alex Tx LPF = selects transmit Low Pass Filter.
-  *Alex Rx HPF = selects receive High Pass filter.
+  *Alex Tx LPF = selects transmit Low Pass Filter. Auto tracks the Transmit Frequency.
+  *Alex Rx HPF = selects receive High Pass filter. Auto tracks Receiver 0 Frequency.
   Update: 03-13-2014: Reverse transmit I and Q samples (FPGA reverses them).
   </doc>
 </block>

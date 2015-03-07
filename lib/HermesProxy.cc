@@ -730,9 +730,48 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    else
 		outbuf[4] = TxDrive;			// c1
 
+
+	    unsigned char RxHPF, TxLPF;
+
+	    RxHPF = AlexRxHPF;
+	    if (AlexRxHPF == 0)				// if Rx autotrack
+	    {
+		if (Receive0Frequency < 1500000)
+		  RxHPF = 0x20;				// bypass
+		else if (Receive0Frequency < 6500000)
+	          RxHPF = 0x10;				// 1.5 MHz HPF
+		else if (Receive0Frequency < 9500000)
+		  RxHPF = 0x08;				// 6.5 MHz HPF
+		else if (Receive0Frequency < 13000000)
+		  RxHPF = 0x04;				// 9.5 mHz HPF
+		else if (Receive0Frequency < 20000000)
+		  RxHPF = 0x01;				// 13 Mhz HPF
+		else if (Receive0Frequency < 50000000)
+		  RxHPF = 0x02;				// 20 MHz HPF
+		else RxHPF = 0x40;			// 6M BPF + LNA
+	    }
+
+	    TxLPF = AlexTxLPF;
+	    if (AlexTxLPF == 0)				// if Tx autotrack
+	    {
+		if (TransmitFrequency > 30000000)
+		  TxLPF = 0x10;				// 6m LPF
+		else if (TransmitFrequency > 19000000)
+		  TxLPF = 0x20;				// 10/12m LPF
+		else if (TransmitFrequency > 14900000)
+		  TxLPF = 0x40;				// 15/17m LPF
+		else if (TransmitFrequency > 9900000)
+		  TxLPF = 0x01;				// 30/20m LPF
+		else if (TransmitFrequency > 4900000)
+		  TxLPF = 0x02;				// 60/40m LPF
+		else if (TransmitFrequency > 3400000)
+		  TxLPF = 0x04;				// 80m LPF
+		else TxLPF = 0x08;			// 160m LPF
+	    }
+
 	    outbuf[5] = 0x40;				// c2 - Alex Manual filter control enabled
-	    outbuf[6] = AlexRxHPF & 0x7f;		// c3 - Alex HPF filter selection
-	    outbuf[7] = AlexTxLPF & 0x7f;		// c4 - Alex LPF filter selection
+	    outbuf[6] = RxHPF & 0x7f;			// c3 - Alex HPF filter selection
+	    outbuf[7] = TxLPF & 0x7f;			// c4 - Alex LPF filter selection
 	  break;
 
 	  case 20:					// Hermes input attenuator setting
