@@ -247,10 +247,10 @@
   6 bits are used (lower 2 bits are overwritten by receive sample speed
   selection. Hermes ignores this register. Default value selects Mercury.
     Example: "0xfc" {including quote marks}
-  *Alex Control = HPSDR Alex Controls - 4 bytes, each assigned to one register.
-  MSB->C3, 3rd byte->C4 for C0=0,  2nd byte->C3, LSB->C4 for C0 = 0x12.
-    Example: "0x00000000" {including quote marks}
-  See "HPSDR - USB Data Protocol" document.
+  *Alex Tx Ant = selects transmit antenna (Tx1, Tx2, or Tx3).
+  *Alex Rx ant = selects receive antenna connector, or Tx antenna via T/R relay.
+  *Alex Tx LPF = selects transmit Low Pass Filter.
+  *Alex Rx HPF = selects receive High Pass filter.
   Update: 03-13-2014: Reverse transmit I and Q samples (FPGA reverses them).
   </doc>
 </block>
