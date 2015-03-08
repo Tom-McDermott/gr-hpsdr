@@ -170,7 +170,7 @@
       <key>0x02</key>
     </option>
     <option>
-      <name>6M BPF+LNA</name>
+      <name>6M LNA+LPF</name>
       <key>0x40</key>
     </option>
   </param>
