@@ -47,6 +47,22 @@
     <key>RxSmp</key>
     <value>192000</value>
     <type>int</type>
+    <option>
+      <name>48000</name>
+      <key>48000</key>
+    </option>
+    <option>
+      <name>96000</name>
+      <key>96000</key>
+    </option>
+    <option>
+      <name>192000</name>
+      <key>192000</key>
+    </option>
+    <option>
+      <name>384000</name>
+      <key>384000</key>
+    </option>
   </param>
   <param>
     <name>Rx Preamp Off/On</name>
