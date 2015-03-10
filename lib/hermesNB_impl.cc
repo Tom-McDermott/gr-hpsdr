@@ -44,12 +44,12 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int NumRx)
+			 int AlexHPF, int AlexLPF, int Verbose, int NumRx)
     {
       return gnuradio::get_initial_sptr
         (new hermesNB_impl(RxFreq0, RxFreq1, TxFreq, RxPre, PTTModeSel, PTTTxMute,
 			PTTRxMute, TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA,
-			AlexHPF, AlexLPF, NumRx));
+			AlexHPF, AlexLPF, Verbose, NumRx));
     }
 
     /*
@@ -59,14 +59,14 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int NumRx)
+			 int AlexHPF, int AlexLPF, int Verbose, int NumRx)
       : gr::block("hermesNB",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),		// inputs to hermesNB block
               gr::io_signature::make(1, 2, sizeof(gr_complex)) )	// outputs from hermesNB block
     {
 	Hermes = new HermesProxy(RxFreq0, RxFreq1, TxFreq, RxPre, PTTModeSel, PTTTxMute,
 		 PTTRxMute, TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA,
-		 AlexHPF, AlexLPF, NumRx);	// Create proxy, do Hermes ethernet discovery
+		 AlexHPF, AlexLPF, Verbose, NumRx);	// Create proxy, do Hermes ethernet discovery
 	//Hermes->RxSampleRate = RxSmp;
 	//Hermes->RxPreamp = RxPre;
 
@@ -168,6 +168,11 @@ void hermesNB::set_AlexRxHPF(int HPF)		// callback to select Alex Rx High Pass F
 void hermesNB::set_AlexTxLPF(int LPF)		// callback to set Alex Tx Low Pass filter
 {
 	Hermes->AlexTxLPF = LPF;
+}
+
+void hermesNB::set_Verbose(int Verb)		// callback to turn Verbose mode on or off
+{
+	Hermes->Verbose = Verb;
 }
 
 

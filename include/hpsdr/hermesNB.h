@@ -50,7 +50,7 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int NumRx);
+			 int AlexHPF, int AlexLPF, int Verbose, int NumRx);
 
       void set_Receive0Frequency(float);	// callback
       void set_Receive1Frequency(float);	// callback
@@ -69,6 +69,10 @@ namespace gr {
       void set_AlexTxAntenna(int);		// callback
       void set_AlexRxHPF(int);			// callback
       void set_AlexTxLPF(int);			// callback
+//
+// Turn Verbose mode on / off
+//
+      void set_Verbose(int);			// callback
 
       bool stop();				// override
       bool start();				// override

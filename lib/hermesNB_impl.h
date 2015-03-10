@@ -50,6 +50,7 @@ namespace gr {
  * \param AlexMan  HPSDR Alex Manual Filter Enable
  * \param AlexHPF  HPSDR Alex Rx High Pass Filter Selector
  * \param AlexLPF  HPSDR Alex Tx Low Pass Filter Selector
+ * \param Verbose  Turns Verbose mode on (=1) or off (=0)
  * \param NumRx  Number of Receivers (1 or 2)
  *
  */
@@ -57,7 +58,7 @@ namespace gr {
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int NumRx);
+			 int AlexHPF, int AlexLPF, int Verbose, int NumRx);
       ~hermesNB_impl();
 
       // Where all the action really happens

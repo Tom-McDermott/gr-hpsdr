@@ -108,6 +108,11 @@ public:
 	bool Duplex;
 
 	unsigned char HermesVersion;
+	unsigned int AlexFwdPwr;
+	unsigned int AlexRevPwr;
+	unsigned int SlowCount;
+	int Verbose;
+
 	bool TxStop;
 	bool PTTOffMutesTx;		// PTT Off mutes the transmitter
 	bool PTTOnMutesRx;		// PTT On receiver
@@ -118,7 +123,7 @@ public:
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexRPF, int NumRx);	// constructor
+			 int AlexHPF, int AlexRPF, int Verbose, int NumRx);	// constructor
 
 	~HermesProxy();			// destructor
 

@@ -55,7 +55,7 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int NumRx)	// constructor
+			 int AlexHPF, int AlexLPF, int Verb, int NumRx)	// constructor
 {
 
 
@@ -88,13 +88,14 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 	sscanf(ClkS, "%x", &cs);
 	ClockSource = (cs & 0xFC);
 
-//	Initialize the 5 Alex control registers.
+//	Initialize the Alex control registers.
 
 	AlexRxAnt = AlexRA;		// Select Alex Receive Antenna or from T/R relay
 	AlexTxAnt = AlexTA;		// Select Alex Tx Antenna
 	AlexRxHPF = AlexHPF;		// Select Alex Receive High Pass Filter
 	AlexTxLPF = AlexLPF;		// Select Alex Transmit Low Pass Filter
 
+	Verbose = Verb;			// Turn Verbose mode on/off
 
 	Receive0Frequency = (unsigned)RxFreq0;
 	Receive1Frequency = (unsigned)RxFreq1; 
@@ -289,7 +290,7 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 	// check for proper frame sync
 	if(inbuf[0] == 0x7f && inbuf[1] == 0x7f && inbuf[2] == 0x7f)
 	{
-		if(c0 == 0) 
+		if((c0 & 0xf8)== 0) 
 		{
 		  if(c1 & 0x01)
 		    ADCoverload = true;
@@ -297,8 +298,25 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 		    ADCoverload = false;
 
 		  HermesVersion = c4;
-		  //fprintf(stderr, "HermesVersion: %d (dec)  %X (hex)\n", HermesVersion, HermesVersion);
 		}
+
+		if((c0 & 0xf8) == 0x10)
+		{
+		  AlexFwdPwr = (unsigned int)c3 * 256 + (unsigned int)c4; 	// AIN3 - conflicts with HPSDR documentatioan
+		  AlexRevPwr = (unsigned int)c1 * 256 + (unsigned int)c2; 	// AIN2 - agrees with HPSDR documentation
+		}
+		
+		if (Verbose)
+		{
+		  SlowCount++;
+		  if ((SlowCount & 0x1ff) == 0x1ff)
+		  {
+		    fprintf(stderr, "FwdPwrVolt = %u  RevPwrVolt = %u  ", AlexFwdPwr, AlexRevPwr);
+		    fprintf(stderr, "ADCOver: %u  HermesVersion: %d (dec)  %X (hex)\n", ADCoverload, HermesVersion, HermesVersion);
+		  }
+		}
+
+
 
 		// Use write and read counters to select from the Rx buffers,
 		// these are circular.
