@@ -108,7 +108,7 @@ public:
 	bool Duplex;
 
 	unsigned char HermesVersion;
-	unsigned int AlexFwdPwr;
+	unsigned int AIN1, AIN2, AIN3, AIN4, AIN5, AIN6;  // Analog inputs to Hermes
 	unsigned int AlexRevPwr;
 	unsigned int SlowCount;
 	int Verbose;
