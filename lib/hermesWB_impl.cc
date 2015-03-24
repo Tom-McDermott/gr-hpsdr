@@ -138,15 +138,14 @@ int hermesWB_impl::general_work (int noutput_items,
   //
 
 	if (!HermesW->RxReadBufAligned())  	// not aligned - we have a problem
-	  for (int i=0; i<63; i++)
+     	  for (int i=0; i<63; i++)
 	  {
 	    if (HermesW->RxBufFillCount() == 0) // we're out of buffers, do nothing
-		return 0;				    
+		return 0;	    
 	    IQBuf_t dummy = HermesW->GetNextRxReadBuf();  // consume a buffer
 	    if (HermesW->RxReadBufAligned())
 		return 0;
 	  }
-
   	if (HermesW->RxBufFillCount() < 64)	// aligned but not enough buffers, do nothing
 	  return 0;
 

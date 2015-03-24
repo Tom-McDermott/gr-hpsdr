@@ -142,7 +142,12 @@ void HermesProxyW::Stop()	// stop ethernet I/O
 void HermesProxyW::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
-	metis_receive_stream_control(RxStream_WB_On);	// start Hermes Wideband Rx data stream
+
+// BUGBUG Try turning one both NB and WB streams to see if it fixes anything
+	metis_receive_stream_control(RxStream_NBWB_On);	// start Hermes Wideband Rx data stream
+
+//	metis_receive_stream_control(RxStream_WB_On);	// start Hermes Wideband Rx data stream
+
 };
 
 void HermesProxyW::PrintRawBuf(RawBuf_t inbuf)	// for debugging
@@ -208,6 +213,8 @@ void HermesProxyW::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx thre
 	}
 	
 
+//fprintf(stderr, "Sequence number: %u\n", SequenceNum);
+
 	// Metis Rx thread gives us collection of samples including the Ethernet header
 	// plus 2 x HPSDR USB frames.
 
@@ -223,17 +230,15 @@ void HermesProxyW::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx thre
 	{
 	  ScheduleTxFrame(); // Schedule a control bits Tx ethernet frame
 
-	  if (RxWriteBufAligned()) // not aligned - we have a problem
-	  {
-	    for (int i=0; i<62; i++)
+	  if (!RxWriteBufAligned()) // not aligned - we have a problem
+	    for (int i=0; i<63; i++)
 	    {
-	      if (RxBufFillCount() >= (NUMRXIQBUFS - 2)) // buffers full, drop ethernet frame
-		return;				    
+	      if (RxBufFillCount() >= (NUMRXIQBUFS - 1)) // buffers full, drop ethernet frame
+		return;		
 	      IQBuf_t dummy = GetNextRxWriteBuf();  	// fill a buffer with trash
 	      if (RxWriteBufAligned())
 		break;						// now aligned
 	    }
-	  }
 	}
 
 	if (RxBufFillCount() >= (NUMRXIQBUFS - 2))	// We're full. throw away ethernet frame
@@ -246,17 +251,17 @@ void HermesProxyW::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx thre
 	  I = (int)(((unsigned char)inbuf[j*2+0]) << 8);
 	  I += (int)((unsigned char)inbuf[j*2+1]);
 	  if(I<0) I = -(~I + 1);
-	    outbuf[j] = (float)I/32767.0;  // should exactly fill one buffer
+	  outbuf[j] = ((float)I/32767.0)-1.0;  // should exactly fill one buffer
 	}
 
 	outbuf = GetNextRxWriteBuf();
-	for (int j = 257; j<512; j++)	// read 256 floats
+	for (int j = 0; j<256; j++)	// read 256 floats
 	{
 	  int I;
-	  I = (int)(((unsigned char)inbuf[j*2+0]) << 8);
-	  I += (int)((unsigned char)inbuf[j*2+1]);
+	  I = (int)(((unsigned char)inbuf[j*2+256]) << 8);
+	  I += (int)((unsigned char)inbuf[j*2+257]);
 	  if(I<0) I = -(~I + 1);
-	    outbuf[j] = (float)I/32767.0;  // should exactly fill one buffer
+	  outbuf[j] = ((float)I/32767.0)-1.0;  // should exactly fill one buffer
 	}
 
 	outbuf = GetNextRxWriteBuf();
