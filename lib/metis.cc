@@ -28,13 +28,22 @@
 *
 */
 
+// Modifications only are Copyright 2012 - 2015, Tom McDermott, N5EG
+// and remain under GNU General Public License, as above.
+//
 // Version 0.1 - November 9, 2012
 //
 // Modifications to metis.c  to produce metis.cc, to work with
 // Gnuradio, and the Hermes module.
-// Modifications only are Copyright 2012 - Tom McDermott, N5EG
-// and remain under GNU General Public License, as above.
 //
+//
+// Version 0.2 - March 22, 2015
+//
+// Add EP6 received wideband frame handler to receive data from
+// Hermes hardware and send to HermesProxyW. Test that appropriate proxies
+// exist (pointer is not NULL).
+//
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,6 +66,7 @@
 
 #include "metis.h"
 #include "HermesProxy.h"
+#include "HermesProxyW.h"
 
 #define MAX_METIS_CARDS 10
 METIS_CARD metis_cards[MAX_METIS_CARDS];
@@ -94,6 +104,7 @@ long sequence=-1;
 
 
 extern HermesProxy* Hermes;
+extern HermesProxyW* HermesW;
 
 
 #define inaddrr(x) (*(struct in_addr *) &ifr->x[sizeof sa.sin_port])
@@ -340,16 +351,17 @@ void* metis_receive_thread(void* arg) {
                         //fprintf(stderr,"received data ep=%d sequence=%ld\n",ep,sequence);
 
                         switch(ep) {
-                            case 6: // EP6
+                            case 6: // EP6			Send to Hermes Narrowband
                                 // process the data
 				if(bytes_read != 1032)
 				  fprintf(stderr,"Metis: bytes_read = %d (!= 1032)\n", bytes_read);
-				Hermes->ReceiveRxIQ(&buffer[0]); // send Ethernet frame to Proxy
+				if (Hermes != NULL)
+				  Hermes->ReceiveRxIQ(&buffer[0]); // send Ethernet frame to Proxy
                                 break;
 
-                            case 4: // EP4		// HermesNb does not handle wideband data
-                                // process_bandscope_buffer(&buffer[8]); 
-                                // process_bandscope_buffer(&buffer[520]);
+                            case 4: // EP4			Send to Hermes Wideband
+				if (HermesW != NULL)
+				  HermesW->ReceiveRxIQ(&buffer[0]); // send Ethernet frame to Proxy
                                 break;
 
                             default:
