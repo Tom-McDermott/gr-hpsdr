@@ -142,12 +142,8 @@ void HermesProxyW::Stop()	// stop ethernet I/O
 void HermesProxyW::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
-
-// BUGBUG Try turning one both NB and WB streams to see if it fixes anything
+	// Note: just turning on the WB stream does not work. Have to throw away the NB samples.
 	metis_receive_stream_control(RxStream_NBWB_On);	// start Hermes Wideband Rx data stream
-
-//	metis_receive_stream_control(RxStream_WB_On);	// start Hermes Wideband Rx data stream
-
 };
 
 void HermesProxyW::PrintRawBuf(RawBuf_t inbuf)	// for debugging
@@ -243,10 +239,6 @@ void HermesProxyW::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx thre
 
 	if (RxBufFillCount() >= (NUMRXIQBUFS - 2))	// We're full. throw away ethernet frame
 	  return;
-
-
-// BUGBUG the format of the data looks wrong. Should be 2's complement binary.
-
 
 	IQBuf_t outbuf = GetCurrentRxWriteBuf();
 	for (int j = 0; j<256; j++)	// read 256 floats

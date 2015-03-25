@@ -348,16 +348,8 @@ void* metis_receive_thread(void* arg) {
 
                         // get the sequence number
                         sequence=((buffer[4]&0xFF)<<24)+((buffer[5]&0xFF)<<16)+((buffer[6]&0xFF)<<8)+(buffer[7]&0xFF);
-////   BUGBUG                     
-//fprintf(stderr,"received data ep=%d  sequence=%ld\n",ep,sequence);
-////
                         switch(ep) {
                             case 6: // EP6			Send to Hermes Narrowband
-
-//////  BUGBUG
-//fprintf(stderr, "Metis EP6: Hermes = %p, sequence = %ld\n", Hermes, sequence);
-//////
-
                                 // process the data
 				if(bytes_read != 1032)
 				  fprintf(stderr,"Metis: bytes_read = %d (!= 1032)\n", bytes_read);
@@ -366,9 +358,6 @@ void* metis_receive_thread(void* arg) {
                                 break;
 
                             case 4: // EP4			Send to Hermes Wideband
-//////  BUGBUG
-//fprintf(stderr, "Metis EP4: HermesW = %p, sequence = %ld\n", HermesW, sequence);
-//////
 				if (HermesW != NULL)
 				  HermesW->ReceiveRxIQ(&buffer[0]); // send Ethernet frame to Proxy
                                 break;
