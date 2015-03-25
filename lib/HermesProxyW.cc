@@ -244,24 +244,24 @@ void HermesProxyW::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx thre
 	if (RxBufFillCount() >= (NUMRXIQBUFS - 2))	// We're full. throw away ethernet frame
 	  return;
 
+
+// BUGBUG the format of the data looks wrong. Should be 2's complement binary.
+
+
 	IQBuf_t outbuf = GetCurrentRxWriteBuf();
 	for (int j = 0; j<256; j++)	// read 256 floats
 	{
-	  int I;
-	  I = (int)(((unsigned char)inbuf[j*2+0]) << 8);
-	  I += (int)((unsigned char)inbuf[j*2+1]);
-	  if(I<0) I = -(~I + 1);
-	  outbuf[j] = ((float)I/32767.0)-1.0;  // should exactly fill one buffer
+	  int I = (((inbuf[j*2+1]) << 8) & 0xff00) | (inbuf[j*2+0] & 0xff);
+	  if(I >= 32768) I -= 65536;
+	  outbuf[j] = ((float)I/32767.0);  // should exactly fill one buffer
 	}
 
 	outbuf = GetNextRxWriteBuf();
 	for (int j = 0; j<256; j++)	// read 256 floats
 	{
-	  int I;
-	  I = (int)(((unsigned char)inbuf[j*2+256]) << 8);
-	  I += (int)((unsigned char)inbuf[j*2+257]);
-	  if(I<0) I = -(~I + 1);
-	  outbuf[j] = ((float)I/32767.0)-1.0;  // should exactly fill one buffer
+	  int I = (((inbuf[j*2+1]) << 8) & 0xff00) | (inbuf[j*2+0] & 0xff);
+	  if(I >= 32768) I -= 65536;
+ 	  outbuf[j] = ((float)I/32767.0);  // should exactly fill one buffer
 	}
 
 	outbuf = GetNextRxWriteBuf();
