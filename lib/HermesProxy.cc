@@ -101,9 +101,6 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
         for (int i=0; i<18; i++)
 	  mactarget[i] = toupper(MACAddr[i]);	// Copy the requested MAC target address
 
-fprintf(stderr,"002 DEBUG MAC Addr Requested = %s\n",mactarget);
-
-
 	Receive0Frequency = (unsigned)RxFreq0;
 	Receive1Frequency = (unsigned)RxFreq1; 
 	TransmitFrequency = (unsigned)TxFreq;		// initialize frequencies
@@ -148,29 +145,14 @@ fprintf(stderr,"002 DEBUG MAC Addr Requested = %s\n",mactarget);
 
 	metis_discover((const char *)(interface));
 
-// TODO
 //
-// If there is no specified MAC address, then just grab the first Hermes/Metis that
-// responds to discovery.  If there is a specific MAC address specified, then wait
-// until it appears in the Metis cards table. then over-write the [0] element
-// of the table with the specified entry, and continue.
-//
-// metis_mac_address(entry)  returns char* to metis_mac_address of the [entry] or NULL
-// if [entry] is empty. Can iterate over [0..found] to see if we discovered it.
-// the string is HH:HH:HH:HH:HH:HH\0 formated, where HH is a 2-digital Hexidecimal number
+// If there is no specified MAC address (i.e. wildcard, or anything less than 17 
+// charracters, then just grab the first Hermes/Metis that
+// responds to discovery. If there is a specific MAC address specified, then wait
+// until it appears in the Metis cards table, and set the metis table index to match.
+// The string is HH:HH:HH:HH:HH:HH\0 formated, where HH is a 2-digital Hexidecimal number
 // uppercase, example:    04:7F:3D:0F:28:5A
 //
-// Need a new field in the constructor, but cannot have a callback (can't change the
-// MAC address after we are already up and running with another Metis MAC address).
-//
-// Metis_card[0] is the unit we default communicate with.  Modify the
-// metis_receive_stream_control to take a 2nd parameter - the entry table number. It
-// currently defaults to zero. Also must modify the metis.cc code to use that additional
-// parameter.
-//
-//
-// TODO
-// fprintf(stderr,"001 DEBUG: found = %i   MAC[0] = %s   IP[0] = %s\n", metis_found(), metis_mac_address(0), metis_ip_address(0));
 
 	metis_entry = 0;
 	if (strlen(mactarget) != 17)			// Not a fully-qualified MAC address, default to first MAC found
@@ -186,7 +168,6 @@ fprintf(stderr,"002 DEBUG MAC Addr Requested = %s\n",mactarget);
 	      {
 		if (strcmp(mactarget, metis_mac_address(i)) == 0)	// Exact match found
 		{
-//fprintf(stderr,"003 DEBUG mactarget = %s   metis_mac_address(%u) = %s\n", mactarget, i, metis_mac_address(i));
 		  metis_entry = i;					// Select entry in metis_table
 	          found = true;
 		  break;
