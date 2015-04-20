@@ -55,7 +55,8 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
-			 int AlexHPF, int AlexLPF, int Verb, int NumRx)	// constructor
+			 int AlexHPF, int AlexLPF, int Verb, int NumRx,
+			 const char* MACAddr)	// constructor
 {
 
 
@@ -96,6 +97,12 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 	AlexTxLPF = AlexLPF;		// Select Alex Transmit Low Pass Filter
 
 	Verbose = Verb;			// Turn Verbose mode on/off
+
+        for (int i=0; i<18; i++)
+	  mactarget[i] = toupper(MACAddr[i]);	// Copy the requested MAC target address
+
+fprintf(stderr,"002 DEBUG MAC Addr Requested = %s\n",mactarget);
+
 
 	Receive0Frequency = (unsigned)RxFreq0;
 	Receive1Frequency = (unsigned)RxFreq1; 
@@ -163,16 +170,31 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 //
 //
 // TODO
-
-
-
-	while (!metis_found())
-		;					// wait until Hermes responds
-
 // fprintf(stderr,"001 DEBUG: found = %i   MAC[0] = %s   IP[0] = %s\n", metis_found(), metis_mac_address(0), metis_ip_address(0));
 
+	metis_entry = 0;
+	if (strlen(mactarget) != 17)			// Not a fully-qualified MAC address, default to first MAC found
+	{
+	  while (metis_found() == 0)
+		;					// wait until Hermes responds with first discovered MAC
+	}
+	else						// Search the table for the entry matching requested MAC address
+	{
+	  bool found = false;
+	  while(!found)					// Search for MAC address in the metis_table until the cows come home
+	    for(int i=0; i<metis_found(); i++)
+	      {
+		if (strcmp(mactarget, metis_mac_address(i)) == 0)	// Exact match found
+		{
+//fprintf(stderr,"003 DEBUG mactarget = %s   metis_mac_address(%u) = %s\n", mactarget, i, metis_mac_address(i));
+		  metis_entry = i;					// Select entry in metis_table
+	          found = true;
+		  break;
+		}
+	      }
+	}
 
-	metis_receive_stream_control(RxStream_Off, 0);	// turn off Hermes -> PC streams
+	metis_receive_stream_control(RxStream_Off, metis_entry);	// turn off Hermes -> PC streams
 
 	UpdateHermes();					// send specific control registers
 							// and initialize 1st Tx buffer
@@ -187,7 +209,7 @@ HermesProxy::~HermesProxy()
 	        LostRxBufCount, TotalRxBufCount, LostTxBufCount,
 		TotalTxBufCount, CorruptRxCount, LostEthernetRx);
 
-	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes data stream
+	metis_receive_stream_control(RxStream_Off, metis_entry);	// stop Hermes data stream
 	
 	metis_stop_receive_thread();	// stop receive_thread & close socket
 
@@ -201,14 +223,14 @@ HermesProxy::~HermesProxy()
 
 void HermesProxy::Stop()	// stop ethernet I/O
 {
-	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_Off, metis_entry);	// stop Hermes Rx data stream
 	TxStop = true;					// stop Tx data to Hermes
 };
 
 void HermesProxy::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
-	metis_receive_stream_control(RxStream_NB_On, 0);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_NB_On, metis_entry);	// stop Hermes Rx data stream
 };
 
 void HermesProxy::PrintRawBuf(RawBuf_t inbuf)	// for debugging
