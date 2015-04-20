@@ -107,7 +107,7 @@ HermesProxyW::HermesProxyW(bool RxPre, const char* Intfc, const char * ClkS,
 	while (!metis_found())
 		;					// wait until Hermes responds
 
-	metis_receive_stream_control(RxStream_Off);	// turn off Hermes -> PC streams
+	metis_receive_stream_control(RxStream_Off, 0);	// turn off Hermes -> PC streams
 
 	UpdateHermes();					// send specific control registers
 							// and initialize 1st Tx buffer
@@ -122,7 +122,7 @@ HermesProxyW::~HermesProxyW()
 	        LostRxBufCount, TotalRxBufCount, LostTxBufCount,
 		TotalTxBufCount, CorruptRxCount, LostEthernetRx);
 
-	metis_receive_stream_control(RxStream_Off);	// stop Hermes data stream
+	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes data stream
 	
 	metis_stop_receive_thread();	// stop receive_thread & close socket
 
@@ -136,7 +136,7 @@ HermesProxyW::~HermesProxyW()
 
 void HermesProxyW::Stop()	// stop ethernet I/O
 {
-	metis_receive_stream_control(RxStream_Off);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes Rx data stream
 	TxStop = true;					// stop Tx data to Hermes
 };
 
@@ -144,7 +144,7 @@ void HermesProxyW::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
 	// Note: just turning on the WB stream does not work. Have to throw away the NB samples.
-	metis_receive_stream_control(RxStream_NBWB_On);	// start Hermes Wideband Rx data stream
+	metis_receive_stream_control(RxStream_NBWB_On, 0);	// start Hermes Wideband Rx data stream
 };
 
 void HermesProxyW::PrintRawBuf(RawBuf_t inbuf)	// for debugging

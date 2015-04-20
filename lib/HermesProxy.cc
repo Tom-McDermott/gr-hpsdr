@@ -141,10 +141,38 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 
 	metis_discover((const char *)(interface));
 
+// TODO
+//
+// If there is no specified MAC address, then just grab the first Hermes/Metis that
+// responds to discovery.  If there is a specific MAC address specified, then wait
+// until it appears in the Metis cards table. then over-write the [0] element
+// of the table with the specified entry, and continue.
+//
+// metis_mac_address(entry)  returns char* to metis_mac_address of the [entry] or NULL
+// if [entry] is empty. Can iterate over [0..found] to see if we discovered it.
+// the string is HH:HH:HH:HH:HH:HH\0 formated, where HH is a 2-digital Hexidecimal number
+// uppercase, example:    04:7F:3D:0F:28:5A
+//
+// Need a new field in the constructor, but cannot have a callback (can't change the
+// MAC address after we are already up and running with another Metis MAC address).
+//
+// Metis_card[0] is the unit we default communicate with.  Modify the
+// metis_receive_stream_control to take a 2nd parameter - the entry table number. It
+// currently defaults to zero. Also must modify the metis.cc code to use that additional
+// parameter.
+//
+//
+// TODO
+
+
+
 	while (!metis_found())
 		;					// wait until Hermes responds
 
-	metis_receive_stream_control(RxStream_Off);	// turn off Hermes -> PC streams
+// fprintf(stderr,"001 DEBUG: found = %i   MAC[0] = %s   IP[0] = %s\n", metis_found(), metis_mac_address(0), metis_ip_address(0));
+
+
+	metis_receive_stream_control(RxStream_Off, 0);	// turn off Hermes -> PC streams
 
 	UpdateHermes();					// send specific control registers
 							// and initialize 1st Tx buffer
@@ -159,7 +187,7 @@ HermesProxy::~HermesProxy()
 	        LostRxBufCount, TotalRxBufCount, LostTxBufCount,
 		TotalTxBufCount, CorruptRxCount, LostEthernetRx);
 
-	metis_receive_stream_control(RxStream_Off);	// stop Hermes data stream
+	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes data stream
 	
 	metis_stop_receive_thread();	// stop receive_thread & close socket
 
@@ -173,14 +201,14 @@ HermesProxy::~HermesProxy()
 
 void HermesProxy::Stop()	// stop ethernet I/O
 {
-	metis_receive_stream_control(RxStream_Off);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_Off, 0);	// stop Hermes Rx data stream
 	TxStop = true;					// stop Tx data to Hermes
 };
 
 void HermesProxy::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
-	metis_receive_stream_control(RxStream_NB_On);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_NB_On, 0);	// stop Hermes Rx data stream
 };
 
 void HermesProxy::PrintRawBuf(RawBuf_t inbuf)	// for debugging
