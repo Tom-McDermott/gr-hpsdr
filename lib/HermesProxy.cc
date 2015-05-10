@@ -389,11 +389,11 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 					SWR =  99.9;
 				}
 
-				fprintf(stderr, "AlexFwdPwr = %4.0f  AlexRevPwr = %4.0f   ", FwdPwr, RevPwr);
+				fprintf(stderr, "AlexFwdPwr = %4.1f  AlexRevPwr = %4.1f   ", FwdPwr, RevPwr);
 				// report SWR if forward power is non-zero
 				if(static_cast<int>(FwdPwr) != 0)
 				{
-					fprintf(stderr, "SWR = %.2f:1 ", SWR);
+					fprintf(stderr, "SWR = %.2f:1   ", SWR);
 				}
 				fprintf(stderr, "ADCOver: %u  HermesVersion: %d (dec)  %X (hex)\n", ADCoverload, HermesVersion, HermesVersion);
 				//fprintf(stderr, "AIN1:%u  AIN2:%u  AIN3:%u  AIN4:%u  AIN5:%u  AIN6:%u\n", AIN1, AIN2, AIN3, AIN4, AIN5, AIN6);  
