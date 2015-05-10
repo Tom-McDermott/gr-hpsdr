@@ -380,10 +380,10 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 					SWR = (1+sqrt(RevPwr/FwdPwr))/(1-sqrt(RevPwr/FwdPwr));
 					if(false == std::isnormal(SWR))
 					{
-						throw;
+						throw 0;
 					}
 				}
-				catch(...)
+				catch(int& e)
 				{
 					// there was an anomaly in the SWR calculation, make it obvious ...
 					SWR =  99.9;
