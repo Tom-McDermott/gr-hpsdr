@@ -370,13 +370,34 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 			  SlowCount++;
 			  if ((SlowCount & 0x1ff) == 0x1ff)
 			  {
-			    float FwdPwr = (float)AIN1 * (float)AIN1 / 145000.0;
-			    float RevPwr = (float)AIN2 * (float)AIN2 / 145000.0;
+				float FwdPwr = (float)AIN1 * (float)AIN1 / 145000.0;
+				float RevPwr = (float)AIN2 * (float)AIN2 / 145000.0;
 
-			    fprintf(stderr, "AlexFwdPwr = %4.0f  AlexRevPwr = %4.0f   ", FwdPwr, RevPwr);
-			    fprintf(stderr, "ADCOver: %u  HermesVersion: %d (dec)  %X (hex)\n", ADCoverload, HermesVersion, HermesVersion);
-			    //fprintf(stderr, "AIN1:%u  AIN2:%u  AIN3:%u  AIN4:%u  AIN5:%u  AIN6:%u\n", AIN1, AIN2, AIN3, AIN4, AIN5, AIN6);  
-			    } 
+				// calculate SWR
+				double SWR =  0.0;
+				try
+				{
+					SWR = (1+sqrt(RevPwr/FwdPwr))/(1-sqrt(RevPwr/FwdPwr));
+					if(false == std::isnormal(SWR))
+					{
+						throw;
+					}
+				}
+				catch(...)
+				{
+					// there was an anomaly in the SWR calculation, make it obvious ...
+					SWR =  99.9;
+				}
+
+				fprintf(stderr, "AlexFwdPwr = %4.0f  AlexRevPwr = %4.0f   ", FwdPwr, RevPwr);
+				// report SWR if forward power is non-zero
+				if(static_cast<int>(FwdPwr) != 0)
+				{
+					fprintf(stderr, "SWR = %.2f:1 ", SWR);
+				}
+				fprintf(stderr, "ADCOver: %u  HermesVersion: %d (dec)  %X (hex)\n", ADCoverload, HermesVersion, HermesVersion);
+				//fprintf(stderr, "AIN1:%u  AIN2:%u  AIN3:%u  AIN4:%u  AIN5:%u  AIN6:%u\n", AIN1, AIN2, AIN3, AIN4, AIN5, AIN6);  
+				}
 			}
 		} //endif sync is valid
 		
