@@ -135,6 +135,8 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 	CurrentEthSeqNum = 0;	//
 
 	
+	TxHoldOff = 0;		// initialize transmit hold off counter
+
 	// allocate the receiver buffers
 	for(int i=0; i<NUMRXIQBUFS; i++)
 		RxIQBuf[i] = new float[RXBUFSIZE];
@@ -212,6 +214,7 @@ void HermesProxy::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
 	metis_receive_stream_control(RxStream_NB_On, metis_entry);	// stop Hermes Rx data stream
+	TxHoldOff = true;				// Hold off buffers before bursting Tx
 };
 
 void HermesProxy::PrintRawBuf(RawBuf_t inbuf)	// for debugging
@@ -1052,27 +1055,40 @@ void HermesProxy::SendTxIQ()
 	bool bufempty = (TxReadCounter == TxWriteCounter);
 	bool bufone = ((TxReadCounter+1 & (NUMTXBUFS - 1)) == TxWriteCounter);
 
+	int TempWriteCounter = TxWriteCounter;
+	if (TxWriteCounter < TxReadCounter)
+	  TempWriteCounter += NUMTXBUFS;
+	bool bufburst = ((TempWriteCounter - TxReadCounter) >= (TXINITIALBURST * 2));
+
 	//pthread_mutex_unlock(&mutexGPT);
 
 	TotalTxBufCount++;
 
+	if(TxHoldOff)	    	// Hold back initial burst of Tx Eth frames
+	{
+	  if (!bufburst)	// Not enough frames to send a burst
+	    return;
+	  			// Have enough frames to send the burst 
+	  TxHoldOff = false;	// clear the holdoff flag
+
+	  for (int i=0; i<(TXINITIALBURST * 2); i++)	// 2 USB frames per Ethernet frame
+ 	  {
+	    metis_write(ep, TxBuf[TxReadCounter], 512);	// write one USB frame to metis
+	    ++TxReadCounter &= (NUMTXBUFS - 1);		// and free it
+	  }
+
+	  return;
+	}
+
+ 	// We're out of bursting mode and into one-at-a-time mode
+
 	if ( bufempty | bufone )    // zero or one buffer ready	
 	{
 	  LostTxBufCount++;
-
-	//fprintf(stderr, "SendTxIQ01: TxReadCounter = %d   TxWriteCounter = %d  "
-		//"TxFrameIdleCount = %d  bufempty = %d   bufone = %d\n",
-		//TxReadCounter, TxWriteCounter, TxFrameIdleCount, bufempty, bufone); 
-
-	 // if(TxFrameIdleCount++ > 400)
-	 // {
-	    //UpdateHermes();             // Force basic register update if 
-	 //   TxFrameIdleCount = 0;	//   we've not sent for about 1 second
-	 // }
+	  return;
 	}
 	else	// two or more buffers ready
 	{
-
 	//fprintf(stderr, "SendTxIQ02: TxReadCounter = %d   TxWriteCounter = %d  TxFrameIdleCount = %d\n",
 		//TxReadCounter, TxWriteCounter, TxFrameIdleCount); 
 
