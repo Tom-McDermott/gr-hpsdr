@@ -3,6 +3,7 @@
   <name>hermesWB</name>
   <key>hpsdr_hermesWB</key>
   <category>hpsdr</category>
+  <flags>throttle</flags>
   <import>import hpsdr</import>
   <make>hpsdr.hermesWB($RxPre, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexHPF, $AlexLPF, $MACAddr)</make>
   <callback>set_RxPreamp($RxPre)</callback>
