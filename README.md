@@ -24,4 +24,9 @@ To build:
     sudo make install 
     sudo ldconfig 
 
+Note:
+-----
+
+Sept 3, 2016  --  Upon upgrade to Xenial (Ubuntu 16.04.1) and gnuradio 3.10, some swig-->python type checking changed. If you are using either 16.04,
+or gnuradio 3.10, then git checkout the xenial310 branch rather than master, and build that instead.
 
