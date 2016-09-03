@@ -55,8 +55,8 @@ namespace gr {
  * \param MACAddr MAC Address of target or * for first detected
  *
  */
-      hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+      hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,

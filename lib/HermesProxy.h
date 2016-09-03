@@ -127,8 +127,8 @@ public:
 	unsigned int metis_entry;	// Index into Metis_card MAC table
 
 
-	HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+	HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexRPF, int Verbose, int NumRx,

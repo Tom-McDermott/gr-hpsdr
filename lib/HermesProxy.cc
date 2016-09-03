@@ -51,8 +51,8 @@
 #include <cstring>
 
 
-HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verb, int NumRx,
@@ -106,9 +106,9 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
 	TransmitFrequency = (unsigned)TxFreq;		// initialize frequencies
 	TxDrive = TxDr;		// default to (almost) off
 	PTTMode = PTTModeSel;
-	RxPreamp = RxPre;
-	PTTOffMutesTx = PTTTxMute;   // PTT Off mutes the transmitter
-	PTTOnMutesRx = PTTRxMute;	// PTT On mutes receiver
+	RxPreamp = (bool)RxPre;
+	PTTOffMutesTx = (bool)PTTTxMute;   // PTT Off mutes the transmitter
+	PTTOnMutesRx = (bool)PTTRxMute;	// PTT On mutes receiver
 
 	ADCdither = false;
 	ADCrandom = false;

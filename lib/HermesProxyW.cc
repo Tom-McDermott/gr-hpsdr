@@ -42,7 +42,7 @@
 #include <cstring>
 
 
-HermesProxyW::HermesProxyW(bool RxPre, const char* Intfc, const char * ClkS,
+HermesProxyW::HermesProxyW(int RxPre, const char* Intfc, const char * ClkS,
 			 int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 			 const char* MACAddr)	// constructor
 {
@@ -67,7 +67,7 @@ HermesProxyW::HermesProxyW(bool RxPre, const char* Intfc, const char * ClkS,
 	TransmitFrequency = 0;		// initialize frequencies
 	TxDrive = 0;		// default to (almost) off
 	PTTMode = 0;
-	RxPreamp = RxPre;
+	RxPreamp = (bool)RxPre;
 	PTTOffMutesTx = 0;   // PTT Off mutes the transmitter
 	PTTOnMutesRx = 0;	// PTT On mutes receiver
 
