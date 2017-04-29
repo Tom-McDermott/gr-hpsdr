@@ -114,7 +114,7 @@ public:
 	unsigned int metis_entry;	// Index into Metis_card MAC table
 
 
-	HermesProxyW(bool RxPre, const char* Intfc, const char * ClkS,
+	HermesProxyW(int RxPre, const char* Intfc, const char * ClkS,
 			int AlexRA, int AlexTA, int AlexHPF, int AlexRPF,
 			const char* MACAddr);	// constructor
 

@@ -40,8 +40,8 @@ namespace gr {
   namespace hpsdr {
 
     hermesNB::sptr
-    hermesNB::make(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+    hermesNB::make(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
@@ -56,8 +56,8 @@ namespace gr {
     /*
      * The private constructor
      */
-    hermesNB_impl::hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+    hermesNB_impl::hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
