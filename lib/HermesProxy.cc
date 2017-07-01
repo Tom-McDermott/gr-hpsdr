@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2013-2015 Tom McDermott, N5EG
+ * Copyright 2013-2017 Tom McDermott, N5EG
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,11 +38,17 @@
 // and send/receive them to Hermes.
 //
 // Version:  December 15, 2012
-// Updates:   Make Clock Source and AlexControl programmable from GUI
-//           July 10, 2013 - update for GRC 3.7
-//	     December 4, 2013 - additional parameters in constructor	
-//           March 13, 2014 - flip transmit I and Q symbols, due to FPGA
+// Updates:  * Make Clock Source and AlexControl programmable from GUI
+//           * July 10, 2013 - update for GRC 3.7
+//	     * December 4, 2013 - additional parameters in constructor	
+//           * March 13, 2014 - flip transmit I and Q symbols, due to FPGA
 //           reversing them. Set TxDrive default to 0 (rather than 255).
+//	     * July 2017 - increase number of receivers to 8.  Hermes
+//	     supports 4, Red Pitaya supports 6.  The protocol spec lists 8,
+//	     but do not know of any hardware that yet supports 8. The
+//	     constructor is getting unwieldy, but XML contrains what can
+//	     be passed from GRC to the constructor to simple types.
+//
 
 #include <gnuradio/io_signature.h>
 #include "HermesProxy.h"
@@ -50,14 +56,87 @@
 #include <stdio.h>
 #include <cstring>
 
+#include <algorithm>
+#include <list>
 
-HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
+// 		Build the scheduler vectors for larger numbers of receivers
+//
+// These involve non-integer ratios, so the queue events are spread relatively
+//   evenly while fitting in the exact number of events.
+
+std::vector<int> * schedulevector[20];
+
+//  Three receivers - 25 Tx queue events per set of 63, 126, 252, 504  received frames
+std::vector<int> L3_48 = {  0, 3, 5, 8, 10, 13, 15, 18, 20, 23, 25, 28, 30,
+ 33, 35, 38, 40, 43, 45, 48, 50, 53, 55, 58, 60 }; // 25 frames per 63
+std::vector<int> L3_96 = {  1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59,
+ 64, 69, 74, 79, 84, 89, 94, 98, 103, 108, 113, 118, 122 }; // 25 frames per 126
+std::vector<int> L3_192 = {  2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110,
+ 118, 128, 138, 148, 158, 168, 178, 188, 196, 206, 216, 226, 236, 244 };  // 25 frames per 252
+std::vector<int> L3_384 = {  4, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220,
+ 236, 256, 276, 296, 316, 336, 356, 376, 392, 412, 432, 452, 472, 488 };  // 25 frames per 504
+
+//  Four receivers - 19 Tx queue events per set of 63, 126, 252, 504  received frames
+std::vector<int> L4_48 = { 3, 6, 10, 13, 16, 20, 23, 26, 30, 33, 36, 40, 43,
+ 46, 50, 53, 56, 59, 62  }; // 19 frames per 63
+std::vector<int> L4_96 = {  6, 12, 20, 26, 32, 40, 46, 52, 60, 66, 72, 80, 86,
+ 92, 100, 106, 112, 118, 124 }; // 19 frames per 126
+std::vector<int> L4_192 = { 12, 24, 40, 52, 64, 80, 92, 104, 120, 132, 144,
+ 160, 172, 184, 200, 212, 224, 236, 248 };  // 19 frames per 252
+std::vector<int> L4_384 = { 24, 48, 80, 104, 128, 160, 184, 208, 240, 264, 288,
+ 320, 344, 368, 400, 424, 448, 472, 496 };  // 19 frames per 504
+
+//  Five receivers - 15 Tx queue events per set of 63, 126, 252, 504  received frames
+std::vector<int> L5_48 = { 4, 8, 12, 16, 21, 25, 29, 33, 37, 42, 46, 50, 54, 58, 62  }; // 15 frames per 63
+std::vector<int> L5_96 = { 8, 16, 24, 32, 42, 50, 58, 66, 74, 84, 92, 100, 108, 116, 124  }; // 15 frames per 126
+std::vector<int> L5_192 = { 16, 32, 48, 64, 84, 100, 116, 132, 148, 168, 184, 200, 216, 232, 248  };  // 15 frames per 252
+std::vector<int> L5_384 = { 32, 64, 96, 128, 168, 200, 232, 264, 296, 336, 368, 400, 432, 464, 496  };  // 15 frames per 504
+
+//  Six receivers - 13 Tx queue events per set of 63, 126, 252, 504  received frames
+std::vector<int> L6_48 = { 5, 10, 15, 20, 24, 29, 34, 39, 44, 48, 53, 58, 62  }; // 13 frames per 63
+std::vector<int> L6_96 = { 10, 20, 30, 40, 48, 58, 68, 78, 88, 96, 106, 116, 124  }; // 13 frames per 126
+std::vector<int> L6_192 = { 20, 40, 60, 80, 96, 116, 136, 156, 176, 192, 212, 232, 248  };  // 13 frames per 252
+std::vector<int> L6_384 = { 40, 80, 120, 160, 192, 232, 272, 312, 352, 384, 424, 464, 496  };  // 13 frames per 504
+
+//  Seven receivers - 11 Tx queue events per set of 63, 126, 252, 504  received frames
+std::vector<int> L7_48 = { 6, 12, 17, 23, 29, 34, 40, 45, 51, 57, 62  }; // 11 frames per 63
+std::vector<int> L7_96 = { 12, 24, 34, 46, 58, 68, 80, 90, 102, 114, 124  }; // 11 frames per 126
+std::vector<int> L7_192 = { 24, 48, 68, 92, 116, 136, 160, 180, 204, 228, 248  };  // 11 frames per 252
+std::vector<int> L7_384 = { 48, 96, 136, 184, 232, 272, 320, 360, 408, 456, 496  };  // 11 frames per 504
+
+
+
+
+HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
+			 int TxFreq, int RxPre,
 			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verb, int NumRx,
 			 const char* MACAddr)	// constructor
 {
+
+	schedulevector[0] = &L3_48;		// Build the array of schedule vector pointers
+	schedulevector[1] = &L3_96;
+	schedulevector[2] = &L3_192;
+	schedulevector[3] = &L3_384;
+	schedulevector[4] = &L4_48;
+	schedulevector[5] = &L4_96;
+	schedulevector[6] = &L4_192;
+	schedulevector[7] = &L4_384;
+	schedulevector[8] = &L5_48;
+	schedulevector[9] = &L5_96;
+	schedulevector[10] = &L5_192;
+	schedulevector[11] = &L5_384;
+	schedulevector[12] = &L6_48;
+	schedulevector[13] = &L6_96;
+	schedulevector[14] = &L6_192;
+	schedulevector[15] = &L6_384;
+	schedulevector[16] = &L7_48;
+	schedulevector[17] = &L7_96;
+	schedulevector[18] = &L7_192;
+	schedulevector[19] = &L7_384;
 
 
 	//pthread_mutex_init (&mutexRPG, NULL);
@@ -103,6 +182,13 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
 
 	Receive0Frequency = (unsigned)RxFreq0;
 	Receive1Frequency = (unsigned)RxFreq1; 
+	Receive2Frequency = (unsigned)RxFreq2; 	
+	Receive3Frequency = (unsigned)RxFreq3;  
+	Receive4Frequency = (unsigned)RxFreq4; 
+	Receive5Frequency = (unsigned)RxFreq5; 
+	Receive6Frequency = (unsigned)RxFreq6; 
+	Receive7Frequency = (unsigned)RxFreq7; 
+
 	TransmitFrequency = (unsigned)TxFreq;		// initialize frequencies
 	TxDrive = TxDr;		// default to (almost) off
 	PTTMode = PTTModeSel;
@@ -147,9 +233,20 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
 
 	metis_discover((const char *)(interface));
 
+
+	USBRowCount[0] = 63;  // Number of Rows of samples per Rx Input 
+	USBRowCount[1] = 36;  // USB frame based on number of receivers 1..8
+	USBRowCount[2] = 25;
+	USBRowCount[3] = 19;
+	USBRowCount[4] = 15;
+	USBRowCount[5] = 13;
+	USBRowCount[6] = 11;
+	USBRowCount[7] = 10;  // Eight receivers
+
+
 //
 // If there is no specified MAC address (i.e. wildcard, or anything less than 17 
-// charracters, then just grab the first Hermes/Metis that
+// characters, then just grab the first Hermes/Metis that
 // responds to discovery. If there is a specific MAC address specified, then wait
 // until it appears in the Metis cards table, and set the metis table index to match.
 // The string is HH:HH:HH:HH:HH:HH\0 formated, where HH is a 2-digital Hexidecimal number
@@ -181,7 +278,7 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int TxFreq, int RxPre,
 
 	UpdateHermes();					// send specific control registers
 							// and initialize 1st Tx buffer
-							// before allowing scheduler to Start()
+							// before allowing scheduler to Start
 };
 
 HermesProxy::~HermesProxy()
@@ -213,45 +310,27 @@ void HermesProxy::Stop()	// stop ethernet I/O
 void HermesProxy::Start()	// start rx stream
 {
 	TxStop = false;					// allow Tx data to Hermes
-	metis_receive_stream_control(RxStream_NB_On, metis_entry);	// stop Hermes Rx data stream
+	metis_receive_stream_control(RxStream_NB_On, metis_entry);	// start Hermes Rx data stream
 	TxHoldOff = true;				// Hold off buffers before bursting Tx
 };
 
 void HermesProxy::PrintRawBuf(RawBuf_t inbuf)	// for debugging
 {
-	fprintf(stderr,"Raw buffer from Hermes:  0x000:: ");
-	for(int i=0; i<8; i++)
-	  fprintf(stderr,"%02X:",inbuf[i]); 
-	fprintf(stderr,"\n");
 
-	inbuf += 8;
-
-	fprintf(stderr, " | 0x008:: ");
-	for(int i=0; i<8; i++)
-	  fprintf(stderr,"%02X:",inbuf[i]); 
-	fprintf(stderr, "\n  ");
-
-	for (int j=0; j<5; j++) {
-	  for(int i=0; i<14; i++)
-	    fprintf(stderr,"%02X:",inbuf[i+j*14+8]); 
-	  fprintf(stderr, "\n  ");
-	}
-	
-	fprintf(stderr, "\n");
-
-	fprintf(stderr, " | 0x208:: ");
-	for(int i=0; i<8; i++)
-	  fprintf(stderr,"%02X:",inbuf[i+512]); 
-	fprintf(stderr,"\n  ");
-
-	for (int j=0; j<5; j++) {
-	  for(int i=0; i<14; i++)
-	    fprintf(stderr,"%02X:",inbuf[i+j*14+520]);
-	  fprintf(stderr, "\n  ");
+	fprintf(stderr, "Addr: %p    Dump of Raw Buffer\n", inbuf);
+	for(int row=0; row<4; row++)
+	{
+	    int addr = row * 16;
+	    fprintf(stderr, "%04X:  ", addr);
+	    for(int column=0; column<8; column++)
+	    	fprintf(stderr, "%02X:", inbuf[row*16+column]);
+	    fprintf(stderr, "...");
+	    for(int column=8; column<16; column++)
+	    	fprintf(stderr, "%02X:", inbuf[row*16+column]);
+	    fprintf(stderr, "\n");
 	}
 
 	fprintf(stderr, "\n");
-
 
 };
 
@@ -262,6 +341,9 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 
 	// look for lost receive packets based on skips in the HPSDR ethernet header
 	// sequence number.
+
+
+//PrintRawBuf(inbuf);	// include Ethernet header
 
 	unsigned int SequenceNum = (unsigned char)(inbuf[4]) << 24;
 	SequenceNum += (unsigned char)(inbuf[5]) << 16;
@@ -291,13 +373,14 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 	// I2 I1 I0 is 24-bit 2's complement format.
 	// There are two of the USB HPSDR frames in the received ethernet buffer.
 	// A buffer of 126 complex pairs is about
+	//	0.3 milliseconds at 384,000 sample rate
 	//	0.6 milliseconds at 192,000 sample rate
 	//	2.4 milliseconds at 48,000 sample rate
-
-
-	// We get 126 complex samples per input buffer, but Gnuradio seems happier
-	// with 128 complex samples per output buffer; QtGUI is smoother, and the
-	// work pipeline is faster.
+	//
+	//
+	// We always allocate one output buffer to unpack every received ethernet frame.
+	// Each input Ethernet frame contains a different number of I + Q samples as 2's
+	// complement depending on the number of receivers.
 	//
  	//    RxWriteCounter - the current Rx buffer we are writing to
 	//    RxWriteFill    - #floats we have written to the current Rx buffer (0..255)
@@ -309,8 +392,6 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 
 	IQBuf_t outbuf;			// RxWrite output buffer selector
 	
-	outbuf = RxIQBuf[RxWriteCounter];	// initialize buffer pointer
-
 	TotalRxBufCount++;
 
 	ScheduleTxFrame(TotalRxBufCount); // Schedule a Tx ethernet frame to Hermes if ready.
@@ -407,194 +488,151 @@ void HermesProxy::ReceiveRxIQ(unsigned char * inbuf)	// called by metis Rx threa
 		else
 		{
 			CorruptRxCount++;
-			//fprintf(stderr, "HermesProxy: EP6 received from Hermes failed sync header check.\n");
-			//PrintRawBuf(inbuf-8);	// include Ethernet header
-			return;
+//			fprintf(stderr, "HermesProxy: EP6 received from Hermes failed sync header check.\n");
+//			int delta = inbuf - inbufptr;
+//			fprintf(stderr, "USBFrameOffset: %i  inbufptr: %p  delta: %i \n", USBFrameOffset, inbufptr, delta);
+//			PrintRawBuf(inbufptr);	// include Ethernet header
+			return;   // error return
 		}
 
 	}	// end for two USB frames
 
 
-	// Use write and read counters to select from the Rx buffers,
-	// these are circular.
+//
+// In each USB frame, the bytes per sample row, number of sample rows comes from the
+// table. The first sample starts at offset 8 bytes.   Each USB frame is 512 bytes
+//
+// ------------------ Input USB 2's complement buffer ------------------
+// # of Rx	# I+Q samples/receiver	#Bytes/row	#Pad Bytes/frame
+// -------	---------------------	----------	----------------
+//    1			63		    8			0
+//    2			36		   14			0
+//    3			25		   20			4
+//    4			19		   26		       10
+//    5			15		   32		       24
+//    6			13		   38		       10
+//    7			11		   44		       20
+//    8			10		   50		        4
+//
+// It's not straight forward to fully pack an output buffer. Instead, build the
+// output buffer with fixed channel alignment. For example, for 3 receivers,
+// outputbuf[0,1] is receiver 0 IQ,  outputbuf[2,3] is receiver 1 IQ, outputbuf[4,5] is
+// receiver 2 IQ. Then outputbuf[6,7] is receiver 0 IQ next sample. A table similar to
+// above for output buffer is needed. One outbuf holds 256 floats and is never fully packed.
+//
+// ------------ Output 256 float buffer sizing --------------
+// # of Rx	# of samples per inBuf		output floats   output complexes
+// -------	-----------------------		-------------   ----------------
+//    1		 63 * 2(I+Q) * 1(NumRx)	 	     126		63
+//    2		 36 * 2(I+Q) * 2(NumRx)		     144		72
+//    3		 25 * 2(I+Q) * 3(NumRx)		     150		75
+//    4		 19 * 2(I+Q) * 4(NumRx)		     152		76
+//    5		 15 * 2(I+Q) * 5(NumRx)		     150		75
+//    6		 13 * 2(I+Q) * 6(NumRx)		     156		78
+//    7		 11 * 2(I+Q) * 7(NumRx)		     154		77	        	
+//    8		 10 * 2(I+Q) * 8(NumRx)		     160		80
+//
+// The work() routine needs to break up each outputbuf to the gnuradio
+// out[] buffer streams (one per Rx).
+//
+// Pseudocode:
+//
+// get next (empty) output buffer
+// set output indexer to zero
+// set input indexer (inbuf, a byte pointer) is already 8 (skip the header)
+// for number-of-rows:
+//   for number-of-receivers:
+//      do twice (for I and for Q):
+//        read 2's-complement at [input indexer]
+//        input index += 3  (bytes)
+//        convert to float
+//        write float[output indexer] to output array
+//        output indexer += 1 (float)
+//      next receiver
+//    input indexer += 2 (bytes)  //skip M1,M0 bytes at end of row
+//    next row
+//
+//
+//
 
-	if ((outbuf = GetNextRxBuf(outbuf)) == NULL)
-	    return;			// all buffers full. Throw away data
+	unsigned int outindex;
+	unsigned char* inbufindex;
 
-	// Convert 24-bit 2's complement integer samples to float with
-	// maximum value of +1.0 and minimum of -1.0
-	// skip sync/register headers (i=0 and i=64)
+	inbuf += 8;		// Skip past USB sync header
 
+	// do two USB frames
+	for (unsigned int USBFrameOffset = 0; USBFrameOffset<=512; USBFrameOffset += 512)
+	{
+	    inbufindex = inbuf + USBFrameOffset;  // inbuf already pointing past Ethernet frame header
 
-	if (NumReceivers == 1)		// one receiver
-	{					// 8 byte header + 8 bytes per row * 63 rows = 512 byte USB
-	  for (int i=1; i<128; i++)	// both USB frames, skip header on first frame
-	  {
-	    if (i==64)			// skip header for 2nd frame
-	      continue;
+	    if ((outbuf = GetNextRxBuf()) == NULL)
+	        return;				// all buffers full. Throw away data
 
-	    Unpack1RxIQ(&inbuf[i*8], outbuf);  // convert 2's comp to float and place in outbuf
+	    outindex = 0;
 
-	    if ((outbuf = GetNextRxBuf(outbuf)) == NULL)  // if needed, get next buffer
-	        return;			// all buffers full. Throw away data      
-	  } 
-	}
-	else				// two receivers
-	{				// 8 byte header + 14 bytes per row * 36 rows = 512 byte USB
-	//PrintRawBuf(inbuf-8);
-	  for (int i=0; i<36; i++)	// first USB frame
-	  {
-	    Unpack2RxIQ(&inbuf[(i*14) + 8], outbuf);  // convert 2's comp to float and place in outbuf
-
-	    if ((outbuf = GetNextRxBuf(outbuf)) == NULL)  // if needed, get next buffer
-	        return;			// all buffers full. Throw away data
-	  } 
-	  for (int i=0; i<36; i++)	// second USB frame
-	  {
-	    Unpack2RxIQ(&inbuf[(i*14) + 520], outbuf);  // convert 2's comp to float and place in outbuf
-
-	    if ((outbuf = GetNextRxBuf(outbuf)) == NULL)  // if needed, get next buffer
-	      return;			// all buffers full. Throw away data
-	  }
-	}
+	    // one USB frame
+	    for (int row=0; row < USBRowCount[NumReceivers - 1]; row++)
+	    {
+	        for (int receiver=0; receiver < NumReceivers; receiver++)
+	        {
+		     outbuf[outindex++] = Unpack2C(inbufindex);	// I
+		     inbufindex += 3;
+		     outbuf[outindex++] = Unpack2C(inbufindex);	// Q
+		     inbufindex += 3;
+	        };
+	        inbufindex +=2;			// skip microphone samples in the row
+	    };
+	};
 
 	return;			// normal return;
-
 };
 
-
-IQBuf_t HermesProxy::GetNextRxBuf(IQBuf_t current_outbuf) // get new Rx buffer if we've filled current one
+// Unpack an unsigned 2's complement sample into a floating point number
+// maximum value of +1.0 and minimum of -1.0
+float HermesProxy::Unpack2C(const unsigned char* inptr)
 {
-
-	//pthread_mutex_lock(&mutexRPG);
-
-	//if(RxWriteFill > RXBUFSIZE)
-	//  fprintf(stderr, "ERROR: RxWriteFill: %d  Overflow\n",RxWriteFill);
-
-	if(RxWriteFill & RXBUFSIZE)  // need a new buffer?
-	{
-	  if (((RxWriteCounter+1) & (NUMRXIQBUFS - 1)) == RxReadCounter)
-	  {
-		LostRxBufCount++;	// No Rx Buffers available. Throw away the data
-	  	//pthread_mutex_unlock(&mutexRPG);
-		return NULL;
-	  }
-	  ++RxWriteCounter &= (NUMRXIQBUFS - 1); // get next writeable buffer
-	  RxWriteFill = 0;
-
-	  //pthread_mutex_unlock(&mutexRPG);
-	  return RxIQBuf[RxWriteCounter];
-	}
-	else				// don't need a new buffer
-	{
-	  //pthread_mutex_unlock(&mutexRPG);
-	  return current_outbuf;
-	}
-};
-
-void HermesProxy::Unpack1RxIQ(const unsigned char* inptr, const IQBuf_t outbuf)
-{
-	// Unpack 8 bytes in the HPSDR USB frame to I and Q for 1 receiver.
 	// 24 bit 2's complement --> float (-1.0 ... +1.0)
-	// Ignore the 16-bit Mic sample from Hermes/Metis
 
 	if ((PTTOnMutesRx) & (PTTMode == PTTOn))
-	{
-	  outbuf[RxWriteFill++] = 0.0;
-	  outbuf[RxWriteFill++] = 0.0;
-	  return;
-	}	
+	    return 0.0;					// if receiver is muted
 
-	int I, Q;
+	int F;
 
-	I = (int)(((signed char)*inptr)<<16);		// Rx0 I
-	inptr++;
-	I += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	I += (int)((unsigned char)*inptr);
-	inptr++;
-	if(I<0) I = -(~I + 1);
+	F = (int)(((signed char)*(inptr))<<16);		// 2C to Float
+	F += ((int)((unsigned char)*(inptr+1))<<8);
+	F += (int)((unsigned char)*(inptr+2));
+	if (F<0)
+	     F = -(~F + 1);
 
-	Q = (int)(((signed char)*inptr)<<16);		// Rx0 Q
-	inptr++;
-	Q += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	Q += (int)((unsigned char)*inptr);
-	inptr++;
-	if(Q<0) Q = -(~Q + 1);
-
-	outbuf[RxWriteFill++] = (float)I/8388607.0;
-	outbuf[RxWriteFill++] = (float)Q/8388607.0;
-
-	// inptr+= 2;					// skip Mic samples
+	return (float)F/8388607.0;
 };
 
-void HermesProxy::Unpack2RxIQ(const unsigned char* inptr, const IQBuf_t outbuf)
+//
+// July 2017 change...
+// Previously, this checked the fill level of the current buffer.
+// New code always needs a new output buffer when called - simplify logic to just check
+// to see if one is available and return it, else return NULL if none available (and
+// increment lost Rx buffer counter).
+//
+
+
+// New version
+IQBuf_t HermesProxy::GetNextRxBuf() // get next Writeable Rx buffer
 {
-	// Unpack 14 bytes in the HPSDR USB frame to I and Q for 2 receivers.
-	// 24 bit 2's complement --> float (-1.0 ... +1.0)
-	// Ignore the 16-bit Mic sample from Hermes/Metis
-
-	if ((PTTOnMutesRx) & (PTTMode == PTTOn))
-	{
-	  outbuf[RxWriteFill++] = 0.0;
-	  outbuf[RxWriteFill++] = 0.0;
-	  outbuf[RxWriteFill++] = 0.0;
-	  outbuf[RxWriteFill++] = 0.0;
-	  return;
-	}	
-
-	int I, Q, I1, Q1;
-	float If, Qf, I1f, Q1f;
-
-	I = (int)(((signed char)*inptr)<<16);		// Rx0 I
-	inptr++;
-	I += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	I += (int)((unsigned char)*inptr);
-	inptr++;
-	if(I<0) I = -(~I + 1);
-	If = (float)I/8388607.0;
-
-	Q = (int)(((signed char)*inptr)<<16);		// Rx0 Q
-	inptr++;
-	Q += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	Q += (int)((unsigned char)*inptr);
-	inptr++;
-	if(Q<0) Q = -(~Q + 1);
-	Qf = (float)Q/8388607.0;
-
-
-	I1 = (int)(((signed char)*inptr)<<16);		// Rx1 I
-	inptr++;
-	I1 += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	I1 += (int)((unsigned char)*inptr);
-	inptr++;
-	if(I1<0) I1 = -(~I1 + 1);
-	I1f = (float)I1/8388607.0;
-
-	Q1 = (int)(((signed char)*inptr)<<16);		// Rx1 Q
-	inptr++;
-	Q1 += ((int)((unsigned char)*inptr)<<8);
-	inptr++;
-	Q1 += (int)((unsigned char)*inptr);
-	inptr++;
-	if(Q1<0) Q1 = -(~Q1 + 1);
-	Q1f = (float)Q1/8388607.0;
-
-	outbuf[RxWriteFill++] = If;
-	outbuf[RxWriteFill++] = Qf;
-	outbuf[RxWriteFill++] = I1f;
-	outbuf[RxWriteFill++] = Q1f;
-
-	// inptr+= 2;					// skip Mic samples
-
-	return;
+  if (((RxWriteCounter+1) & (NUMRXIQBUFS - 1)) == RxReadCounter)
+  {
+    LostRxBufCount++;	// No Rx Buffers available. Throw away the data
+    return NULL;
+  }
+  else
+  {
+    ++RxWriteCounter &= (NUMRXIQBUFS - 1); // get next writeable buffer
+    return RxIQBuf[RxWriteCounter];
+  }
 };
 
-IQBuf_t HermesProxy::GetRxIQ()		// called by HermesNB to pickup any RxIQ
+
+IQBuf_t HermesProxy::GetRxIQ()	// next Readable Rx buffer, called by HermesNB to pickup any RxIQ
 {
 
 	//int status = pthread_mutex_trylock(&mutexRPG);	// Don't block gnuradio scheduler
@@ -613,7 +651,7 @@ IQBuf_t HermesProxy::GetRxIQ()		// called by HermesNB to pickup any RxIQ
 
 	//pthread_mutex_unlock(&mutexRPG);
 
-	return ReturnBuffer;
+	return ReturnBuffer;			// next readable Rx buffer
 };
 
 
@@ -625,84 +663,178 @@ IQBuf_t HermesProxy::GetRxIQ()		// called by HermesNB to pickup any RxIQ
 // Hermes is sending to us. This depends on the Rx Sample rate and the number of
 // receivers because the Tx sample rate is fixed at 48000.
 //
-// Sample rate		# Receivers		# Receive frames for one Tx frame
-// -----------		-----------		---------------------------------
-//    48000			1				1
-//    48000			2				1.75
-//    96000			1				2
-//    96000			2				3.5
-//   192000			1				4
-//   192000			2				7
-//   384000			1				8
-//   384000			2				14
+// Some of the ratios involve prime numbers, so a fixed rate of Rx frames for each Tx
+// frame is not practical.  Instead, a table holds bits that indicate when to queue a
+// Tx frame. The RxBufCount is a monotonically increasing long int, each Rx frame
+// increments it. The transmitter always transmits 63 I+Q samples per frame.
+// The bits in the array are spaced as uniformly as possible given prime numbers.
+//
+//					      USB		 USB 
+// RxSampleRate	#Receivers	#TxSamp*Rate/buffer	#RxSamp/buffer		Ratio Rx to Tx
+// -----------	----------	-------------------	--------------		--------------
+//    48000		1		63			63		1
+//    48000		2		63			36		1.75
+//    48000		3		63			25		2.52
+//    48000		4		63			19		3.315789476...
+//    48000		5		63			15		4.2
+//    48000		6		63			13		4.846153846...
+//    48000		7		63			11		5.727272727...
+//    48000		8		63			10		6.3
+//    96000		1		126			63		2
+//    96000		2		126			36		3.5
+//    96000		3		126			25		5.04
+//    96000		4		126			19		6.63157894...
+//    96000		5		126			15		8.4
+//    96000		6		126			13		9.69230769...
+//    96000		7		126			11		11.45454545...
+//    96000		8		126			10		12.6
+//    192000		1		252			63		4
+//    192000		2		252			36		7
+//    192000		3		252			25		10.08
+//    192000		4		252			19
+//    192000		5		252			15		16.8
+//    192000		6		252			13
+//    192000		7		252			11
+//    192000		8		252			10		25.2
+//    384000		1		504			63		8
+//    384000		2		504			36		14
+//    384000		3		504			25		20.16
+//    384000		4		504			19
+//    384000		5		504			15		33.2
+//    384000		6		504			13
+//    384000		7		504			11
+//    384000		8		504			10		50.4
 //
 //
-// If no data to transmit, periodically send a frame so that basic control registers
-// get updated.   [Hooks left commented for future use].
+//
+// Method
+// ------
+// 
+// An Ethernet frame holds 2 HPSDR-USB frames, so the ratios above don't change when
+// counting ethernet frames (Tx and Rx both double, ratio stays the same).  We count
+// Ethernet frames to determine when to schedule a Tx frame.
+//
+// For 1 or 2 receivers the ratios involve small common denominators, so we just
+// count Ethernet frames by looking at the frame sequence number. For 3 or more
+// receivers the ratios are non integer, so we use arrays to tell us when to
+// schedule a Tx frame. For example, for 3 receivers and a rx rate of 48ksps, we
+// need to almost uniformly in time schedule 25 tx frames for every 63 that are
+// received.
+//
+// Future: If no data to transmit, periodically send a frame so that basic control
+// registers get updated.   [Hooks left commented for future use].
+//
 
 
 void HermesProxy::ScheduleTxFrame(unsigned long RxBufCount) // Transmit one ethernet frame to Hermes if ready.
 {
+	// RxBufCount is a sequential 32-bit unsigned int received etherent frame sequence number
 
-	if(NumReceivers == 1)		// one receiver
+
+	switch (NumReceivers)
 	{
-	  if(RxSampleRate == 48000)	// one Tx frame for each Rx frame
-	  {
-		SendTxIQ();
-		return;
-	  }
-
-	  if(RxSampleRate == 96000)	// one Tx frame for each two Rx frames
-	    if((RxBufCount & 0x1) == 0)
-	    {
-		SendTxIQ();
-		return;
-	    }
+	case 1 :
+		if(RxSampleRate == 48000)	// one Tx frame for each Rx frame
+		{
+			SendTxIQ();
+			return;
+		}
 	
-	  if(RxSampleRate == 192000)	// one Tx frame for each four Tx frames
-	    if((RxBufCount & 0x3) == 0)
-	    {
-		SendTxIQ();
-		return;
-	    }
-
-	  if(RxSampleRate == 384000)	// one Tx frame for each eight Tx frames
-	    if((RxBufCount & 0x7) == 0)
-	    {
-		SendTxIQ();
-		return;
-	    }
-	}
-	else				// two receivers
-	{
-	  if(RxSampleRate == 48000)			// one Tx frame for each 1.75 Rx frame
-	    if(((RxBufCount % 0x7) & 0x01) == 0)    	// (four Tx frames for each 7 Rx frames)
-	    {
-	        SendTxIQ();				// 0, 2, 4, 6   (not 1, 3, 5)
-		return;
-	    }
-
-	  if(RxSampleRate == 96000)			// one Tx frame for each 3.5 Rx frames
-	    if(((RxBufCount % 0x7) & 0x03) == 0) 	// (two Tx frames for each 7 Rx frames)
-	    {
-		SendTxIQ();				// 0, 4    (not 1, 2, 3, 5, 6)
-		return;
-	    }
+		if(RxSampleRate == 96000)	// one Tx frame for each two Rx frames
+		  if((RxBufCount & 0x1) == 0)
+		  {
+			SendTxIQ();
+			return;
+		  }
 	
-	  if(RxSampleRate == 192000)			// one Tx frame for each seven Tx frames
-	    if((RxBufCount % 0x7) == 0)
-	    {
-		SendTxIQ();
-		return;
-	    }
+		if(RxSampleRate == 192000)	// one Tx frame for each four Tx frames
+		  if((RxBufCount & 0x3) == 0)
+		  {
+			SendTxIQ();
+			return;
+		  }
+
+		if(RxSampleRate == 384000)	// one Tx frame for each eight Tx frames
+		  if((RxBufCount & 0x7) == 0)
+		  {
+			SendTxIQ();
+			return;
+		  }
+		break;		
+
+	case 2 :
+		if(RxSampleRate == 48000)			// one Tx frame for each 1.75 Rx frame
+		  if(((RxBufCount % 0x7) & 0x01) == 0)    	// (four Tx frames for each 7 Rx frames)
+	    	  {
+	        	SendTxIQ();				// 0, 2, 4, 6   (not 1, 3, 5)
+			return;
+	    	  }
+
+	  	if(RxSampleRate == 96000)			// one Tx frame for each 3.5 Rx frames
+	    	  if(((RxBufCount % 0x7) & 0x03) == 0) 	// (two Tx frames for each 7 Rx frames)
+	    	  {
+			SendTxIQ();				// 0, 4    (not 1, 2, 3, 5, 6)
+			return;
+	    	  }
 	
-	  if(RxSampleRate == 384000)			// one Tx frame for each fourteen Tx frames
-	    if((RxBufCount % 14) == 0)
-	    {
-		SendTxIQ();
-		return;
-	    }
-	}
+	  	if(RxSampleRate == 192000)			// one Tx frame for each seven Tx frames
+	    	  if((RxBufCount % 0x7) == 0)
+	    	  {
+			SendTxIQ();
+			return;
+	    	  }
+	
+	  	if(RxSampleRate == 384000)			// one Tx frame for each fourteen Tx frames
+	    	  if((RxBufCount % 14) == 0)
+	    	{
+			SendTxIQ();
+			return;
+	    	}
+		break;
+
+
+	default :						// 3 or more receivers
+
+//	// Compute a selector to decide which scheduler vector to use
+
+		int FrameIndex;
+		int RxNumIndex = NumReceivers-3;	  //   3,  4,  5,  6,  7  -->  0, 1, 2, 3, 4
+
+		int SpeedIndex = (RxSampleRate) / 48000;  // 48k, 96k, 192k, 384k -->  1, 2, 4, 8
+		SpeedIndex = SpeedIndex >> 1;		  // 48k, 96k, 192k, 384k -->  0, 1, 2, 4
+		if (SpeedIndex == 4)  SpeedIndex = 3;	  // 48k, 96k, 192k, 384k -->  0, 1, 2, 3
+
+		int selector = RxNumIndex * 4 + SpeedIndex;	//  0 .. 19
+
+	// Compute the frame number within a vector
+
+		if(RxSampleRate == 48000)
+		    FrameIndex = RxBufCount % 63;	// FrameIndex is 0..62
+	  	if(RxSampleRate == 96000)
+		    FrameIndex = RxBufCount % 126;	// FrameIndex is 0..125
+	  	if(RxSampleRate == 192000)
+		    FrameIndex = RxBufCount % 252;	// FrameIndex is 0..251
+	  	if(RxSampleRate == 384000)
+		    FrameIndex = RxBufCount % 504;	// FrameIndex is 0..503
+
+
+		std::vector<int> * p;
+		p = schedulevector[selector];		// pick the schedule vector matching NumRx,RxSpeed
+
+		std::vector<int>::iterator itr;
+		itr = find (p->begin(), p->end(), FrameIndex);
+		if (itr != p->end())
+		{
+		    SendTxIQ();		// if the Vector contains FrameIndex then schedule Tx Ethernet packet
+
+//fprintf(stderr, "Scheduled 3..7  NumReceivers: %i   RxSampleRate: %i    selector: %i   SampleIndex: %i\n",
+// NumReceivers, RxSampleRate, selector, SampleIndex);
+
+		}
+		break;
+
+	}; // switch
+
 	return;
 };
 
@@ -788,8 +920,18 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    if(ADCrandom)
 		RxCtrl |= 0x10;
 
-	    if(NumReceivers == 2)
-		Ctrl4 |= 0x08;
+
+	    Ctrl4 |= ((NumReceivers-1) << 3) & 0x38;	// Number of receivers
+							// V1.58 of protocol_1 spec allows
+							// setting up to 8 receivers, but
+							// I can't find which register to set the
+							// Rx Frequency of the 8th receiver.
+							// Hermes sends corrupted USB frames if
+							// NumReceivers > 4.   Theoretically
+							// Red Pitaya is OK to 6 (to be tested by
+							// someone else).
+
+
 	    if(Duplex)
 		Ctrl4 |= 0x04;
 
@@ -806,30 +948,60 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    outbuf[7] = ((unsigned char)(TransmitFrequency)) & 0xff;		// c4 RxFreq LSB
           break;
 
-	  case 4:					// Rx1 NCO freq
+	  case 4:					// Rx1 NCO freq (out port 0)
 	    outbuf[4] = ((unsigned char)(Receive0Frequency >> 24)) & 0xff;	// c1 RxFreq MSB
 	    outbuf[5] = ((unsigned char)(Receive0Frequency >> 16)) & 0xff;	// c2
 	    outbuf[6] = ((unsigned char)(Receive0Frequency >> 8)) & 0xff;	// c3
 	    outbuf[7] = ((unsigned char)(Receive0Frequency)) & 0xff;	// c4 RxFreq LSB
 	  break;
 
-	  case 6:					// Rx2 NCO freq
+	  case 6:					// Rx2 NCO freq (out port 1)
 	    outbuf[4] = ((unsigned char)(Receive1Frequency >> 24)) & 0xff; // c1 RxFreq MSB
 	    outbuf[5] = ((unsigned char)(Receive1Frequency >> 16)) & 0xff; // c2
 	    outbuf[6] = ((unsigned char)(Receive1Frequency >> 8)) & 0xff;	 // c3
 	    outbuf[7] = ((unsigned char)(Receive1Frequency)) & 0xff;	 // c4 RxFreq LSB
 	  break;
 
-	  case 8:					// Rx3 NCO freq
-	  case 10:					// Rx4 NCO freq
-	  case 12:					// Rx5 NCO freq
-	  case 14:					// Rx6 NCO freq
-	  case 16:					// Rx7 NCO freq
-	    outbuf[4] = 0;				// c1 RxFreq MSB
-	    outbuf[5] = 0;				// c2
-	    outbuf[6] = 0;				// c3
-	    outbuf[7] = 0;				// c4 RxFreq LSB
+	  case 8:					// Rx3 NCO freq (out port 2)
+	    outbuf[4] = ((unsigned char)(Receive2Frequency >> 24)) & 0xff; // c1 RxFreq MSB
+	    outbuf[5] = ((unsigned char)(Receive2Frequency >> 16)) & 0xff; // c2
+	    outbuf[6] = ((unsigned char)(Receive2Frequency >> 8)) & 0xff;	 // c3
+	    outbuf[7] = ((unsigned char)(Receive2Frequency)) & 0xff;	 // c4 RxFreq LSB
 	  break;
+
+	  case 10:					// Rx4 NCO freq (out port 3)
+	    outbuf[4] = ((unsigned char)(Receive3Frequency >> 24)) & 0xff; // c1 RxFreq MSB
+	    outbuf[5] = ((unsigned char)(Receive3Frequency >> 16)) & 0xff; // c2
+	    outbuf[6] = ((unsigned char)(Receive3Frequency >> 8)) & 0xff;	 // c3
+	    outbuf[7] = ((unsigned char)(Receive3Frequency)) & 0xff;	 // c4 RxFreq LSB
+	  break;
+
+	  case 12:					// Rx5 NCO freq (out port 4)
+	    outbuf[4] = ((unsigned char)(Receive4Frequency >> 24)) & 0xff; // c1 RxFreq MSB
+	    outbuf[5] = ((unsigned char)(Receive4Frequency >> 16)) & 0xff; // c2
+	    outbuf[6] = ((unsigned char)(Receive4Frequency >> 8)) & 0xff;	 // c3
+	    outbuf[7] = ((unsigned char)(Receive4Frequency)) & 0xff;	 // c4 RxFreq LSB
+	  break;
+
+	  case 14:					// Rx6 NCO freq (out port 5)
+	    outbuf[4] = ((unsigned char)(Receive5Frequency >> 24)) & 0xff; // c1 RxFreq MSB
+	    outbuf[5] = ((unsigned char)(Receive5Frequency >> 16)) & 0xff; // c2
+	    outbuf[6] = ((unsigned char)(Receive5Frequency >> 8)) & 0xff;	 // c3
+	    outbuf[7] = ((unsigned char)(Receive5Frequency)) & 0xff;	 // c4 RxFreq LSB
+	  break;
+
+	  case 16:					// Rx7 NCO freq (out port 6)
+	    outbuf[4] = ((unsigned char)(Receive6Frequency >> 24)) & 0xff; // c1 RxFreq MSB
+	    outbuf[5] = ((unsigned char)(Receive6Frequency >> 16)) & 0xff; // c2
+	    outbuf[6] = ((unsigned char)(Receive6Frequency >> 8)) & 0xff;	 // c3
+	    outbuf[7] = ((unsigned char)(Receive6Frequency)) & 0xff;	 // c4 RxFreq LSB
+	  break;
+
+
+	//	Note:  While Ver 1.58 of the HPSDR USB protocol doucment specifies up to 8 receivers,
+	//	It only defines 7 receive frequency control register addresses. So we are currently
+	//	limited to 7 receivers implemented.
+
 
 	  case 18:					// drive level & filt select (if Alex)
 	    if (PTTOffMutesTx & (PTTMode == PTTOff))
@@ -909,7 +1081,8 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 // Audio output could come from in1 but that forms a flowgraph loop in most useful cases
 // which is disallowed by GNU Radio, so that code is commented out.
 
-int HermesProxy::PutTxIQ(const gr_complex * in0, /*const gr_complex * in1,*/ int nsamples) // called by HermesNB to give us IQ data to send
+ // called by HermesNB to give us IQ data to send
+int HermesProxy::PutTxIQ(const gr_complex * in0, /*const gr_complex * in1,*/ int nsamples)
 {
 
         RawBuf_t outbuf;
@@ -1036,6 +1209,8 @@ RawBuf_t HermesProxy::GetNextTxBuf()		// get a TXBuf if available
 
 // SendTxIQ() is called on a periodic basis to send Tx Ethernet frames to the 
 // Hermes/Metis hardware.
+
+
 void HermesProxy::SendTxIQ()
 {
 
@@ -1113,5 +1288,6 @@ void HermesProxy::SendTxIQ()
 
 // TODO not yet implemented
 void HermesProxy::ReceiveMicLR() {};	// receive an LR audio bufer from Hermes hardware
+
 
 
