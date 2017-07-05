@@ -30,19 +30,19 @@
     <name>Rcvr 0 Frequency, Hz.</name>
     <key>Rx0F</key>
     <value>7200000</value>
-    <type>real</type>
+    <type>int</type>
   </param>
   <param>
     <name>Rcvr 1 Frequency, Hz.</name>
     <key>Rx1F</key>
     <value>7200000</value>
-    <type>real</type>
+    <type>int</type>
   </param>
   <param>
     <name>Transmit Frequency, Hz.</name>
     <key>TxF</key>
     <value>7200000</value>
-    <type>real</type>
+    <type>int</type>
   </param>
   <param>
     <name>Rx Sample Rate</name>
@@ -69,20 +69,44 @@
   <param>
     <name>Rx Preamp Off/On</name>
     <key>RxPre</key>
-    <value>0</value>
-    <type>int</type>
+    <value>False</value>
+    <type>bool</type>
+    <option>
+      <name>Off</name>
+      <key>False</key>
+    </option>
+    <option>
+      <name>On</name>
+      <key>True</key>
+    </option>
   </param>
   <param>
     <name>PTT On Mutes Rx</name>
     <key>PTTRx</key>
-    <value>1</value>
-    <type>int</type>
+    <value>True</value>
+    <type>bool</type>
+    <option>
+      <name>Off</name>
+      <key>False</key>
+    </option>
+    <option>
+      <name>On</name>
+      <key>True</key>
+    </option>
   </param>
   <param>
     <name>PTT Off Mutes Tx</name>
     <key>PTTTx</key>
-    <value>1</value>
-    <type>int</type>
+    <value>True</value>
+    <type>bool</type>
+    <option>
+      <name>Off</name>
+      <key>False</key>
+    </option>
+    <option>
+      <name>On</name>
+      <key>True</key>
+    </option>
   </param>
   <param>
     <name>Tx PTT mode Off/Vox/On</name>
