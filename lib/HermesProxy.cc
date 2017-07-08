@@ -223,13 +223,23 @@ HermesProxy::HermesProxy(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
 	
 	TxHoldOff = 0;		// initialize transmit hold off counter
 
-	// allocate the receiver buffers
-	for(int i=0; i<NUMRXIQBUFS; i++)
+
+	try
+	{
+	    // allocate the receiver buffers
+	    for(int i=0; i<NUMRXIQBUFS; i++)
 		RxIQBuf[i] = new float[RXBUFSIZE];
 
-	// allocate the transmit buffers
-	for(int i=0; i<NUMTXBUFS; i++)
+	    // allocate the transmit buffers
+	    for(int i=0; i<NUMTXBUFS; i++)
 		TxBuf[i] = new unsigned char[TXBUFSIZE];
+	}
+	catch(std::bad_alloc& ba)
+	{
+	   fprintf(stderr, "\nFATAL: unable to allocate memory for buffers.\n %s\n", ba.what());
+	   throw;
+	}
+
 
 	metis_discover((const char *)(interface));
 
