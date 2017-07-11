@@ -5,9 +5,15 @@
   <category>hpsdr</category>
   <flags>throttle</flags>
   <import>import hpsdr</import>
-  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexHPF, $AlexLPF, $Verbose, $num_outputs,$MACAddr)</make>
+  <make>hpsdr.hermesNB($Rx0F, $Rx1F, $Rx2F, $Rx3F, $Rx4F, $Rx5F, $Rx6F, $Rx7F, $TxF, $RxPre, $PTTmode, $PTTTx, $PTTRx, $TxDrive, $RxSmp, $Intfc, $CkS, $AlexRA, $AlexTA, $AlexHPF, $AlexLPF, $Verbose, $num_outputs, $MACAddr)</make>
   <callback>set_Receive0Frequency($Rx0F)</callback>
   <callback>set_Receive1Frequency($Rx1F)</callback>
+  <callback>set_Receive2Frequency($Rx2F)</callback>
+  <callback>set_Receive3Frequency($Rx3F)</callback>
+  <callback>set_Receive4Frequency($Rx4F)</callback>
+  <callback>set_Receive5Frequency($Rx5F)</callback>
+  <callback>set_Receive6Frequency($Rx6F)</callback>
+  <callback>set_Receive7Frequency($Rx7F)</callback>
   <callback>set_RxSampRate($RxSmp)</callback>
   <callback>set_RxPreamp($RxPre)</callback>
   <callback>set_PTTMode($PTTmode)</callback>
@@ -38,6 +44,42 @@
     <value>7200000</value>
     <type>real</type>
   </param>
+  <param>
+    <name>Rcvr 2 Frequency, Hz.</name>
+    <key>Rx2F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Rcvr 3 Frequency, Hz.</name>
+    <key>Rx3F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Rcvr 4 Frequency, Hz.</name>
+    <key>Rx4F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Rcvr 5 Frequency, Hz.</name>
+    <key>Rx5F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Rcvr 6 Frequency, Hz.</name>
+    <key>Rx6F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>
+  <param>
+    <name>Rcvr 7 Frequency, Hz.</name>
+    <key>Rx7F</key>
+    <value>7200000</value>
+    <type>real</type>
+  </param>  
   <param>
     <name>Transmit Frequency, Hz.</name>
     <key>TxF</key>
@@ -97,7 +139,7 @@
     <type>int</type>
   </param>
   <param>
-    <name>Num Rcvrs (1 or 2)</name>
+    <name>Num Rcvrs (1 .. 7)</name>
     <key>num_outputs</key>
     <value>1</value>
     <type>int</type>
@@ -252,7 +294,7 @@
   </param>
 
 <check>$num_outputs >= 1</check> 
-<check>2 >= $num_outputs</check>   
+<check>7 >= $num_outputs</check>   
 
   <!-- Make one 'sink' node per input. Sub-nodes:
        * name (an identifier for the GUI)
@@ -276,23 +318,26 @@
   </source>
 
   <doc>
-  This block is the HPSDR Hermes/Metis module.
-  It supports one or two receivers and one transmitter in the Narrow Band
-  (digital downconversion) mode.
+  This block is the HPSDR Hermes/Metis module, protocol_1.
+  It supports one transmitter. It supports one through seven
+  receivers, your hardware probably supports less than 7 receivers.
+    Hermes supports 4 receivers maximum.
+    Red Pitaya supports 6 receivers maximum.
+ 
   *RxSamp = 48000, 96000, 192000, or 384000
   *RxPreamp = 0 (Off), or  1 (On)
   *PTTMode = 0 (TxOff),  1 (Vox on Txframe contents), or  2 (TxOn)
   *PTTOffMutesTx = 0 (Tx always emits), 1 (Tx IQ is zeroed when PTT is Off)
   *PTTOnMutesRx = 0 (Rx always receives), 1 (Rx IQ is zeroed when PTT is On)
   *TxDrive = 0..255 (0 is minimum (but not zero) drive, 255 is maximum drive)
-  Rcvr0 corresponds to out0, Rcvr1 corresponds to out1.
+   Rcvr0 corresponds to out0, Rcvr1 corresponds to out1.
   *Interface = the ethernet interface to use.
     Example: "eth0" {including quote marks}.
   *Clock Source = HPSDR Clock Selector - 1 byte-> assigned to one register.
-  byte->C1 when C0 = 0. Allows selection of clock and mic sources. Only upper
-  6 bits are used (lower 2 bits are overwritten by receive sample speed
-  selection. Hermes ignores this register. Default value selects Mercury.
-    Example: "0xfc" {including quote marks}
+   byte->C1 when C0 = 0. Allows selection of clock and mic sources. Only upper
+   6 bits are used (lower 2 bits are overwritten by receive sample speed
+   selection. Hermes ignores this register. Default value selects Mercury.
+     Example: "0xfc" {including quote marks}
   *Alex Tx Ant = selects transmit antenna (Tx1, Tx2, or Tx3).
   *Alex Rx ant = selects receive antenna connector, or Tx antenna via T/R relay.
   *Alex Tx LPF = selects transmit Low Pass Filter. Auto tracks the Transmit Frequency.
@@ -302,5 +347,6 @@
     select the first detected Metis/Hermes regardless of it's MAC Address.
     MACAddr is a string (and must be enclosed in quotes).
   Update: 03-13-2014: Reverse transmit I and Q samples (FPGA reverses them).
+  Update: July 2017 - increase receivers supported to 7.
   </doc>
 </block>

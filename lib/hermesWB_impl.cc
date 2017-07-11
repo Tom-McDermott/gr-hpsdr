@@ -40,7 +40,7 @@ namespace gr {
   namespace hpsdr {
 
     hermesWB::sptr
-    hermesWB::make(bool RxPre, const char* Intfc, const char * ClkS,
+    hermesWB::make(int RxPre, const char* Intfc, const char * ClkS,
 		   int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 		   const char* MACAddr)
     {
@@ -51,7 +51,7 @@ namespace gr {
     /*
      * The private constructor
      */
-    hermesWB_impl::hermesWB_impl(bool RxPre, const char* Intfc, const char * ClkS,
+    hermesWB_impl::hermesWB_impl(int RxPre, const char* Intfc, const char * ClkS,
 			 int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 			 const char* MACAddr)
       : gr::block("hermesWB",

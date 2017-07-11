@@ -46,7 +46,7 @@ namespace gr {
        * class. hpsdr::hermesWB::make is the public interface for
        * creating new instances.
        */
-      static sptr make(bool RxPre, const char* Intfc, const char * ClkS,
+      static sptr make(int RxPre, const char* Intfc, const char * ClkS,
 			int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 			const char* MACAddr);
 

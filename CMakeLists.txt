@@ -23,6 +23,11 @@
 ########################################################################
 cmake_minimum_required(VERSION 2.6)
 project(gr-hpsdr CXX C)
+
+#### Enable c++ 11     For lists     Added July 2017
+set(CMAKE_CXX_FLAGS "-std=c++11")
+
+
 enable_testing()
 
 #select the release build type by default to get optimization flags

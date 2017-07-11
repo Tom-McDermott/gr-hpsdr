@@ -43,7 +43,7 @@ namespace gr {
  * \param AlexLPF  HPSDR Alex Tx Low Pass Filter Selector
  *
  */
-      hermesWB_impl(bool RxPre, const char* Intfc, const char * ClkS,
+      hermesWB_impl(int RxPre, const char* Intfc, const char * ClkS,
 			 int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 			 const char* MACAddr);
       ~hermesWB_impl();

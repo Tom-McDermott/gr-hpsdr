@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2013 - 2015 Thomas C. McDermott, N5EG
+ * Copyright 2013 - 2017 Thomas C. McDermott, N5EG
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,14 @@
  */
 
 // -----------------------------------------------------------------
-// Additions for ALEX friendly registers 03/01/2015
-// On the alex branch.
+// 				Revisions
+//
+// Mar 1, 2015 - Additions for ALEX friendly registers.
+//
+// July 2017 -	Modified to allow up to 8 receivers. No longer emits
+//		256 sample buffers to gnuradio, rather each stream
+//		contains a smaller number of samples dependent on
+//		the number of receivers.
 // -----------------------------------------------------------------
 
 #ifdef HAVE_CONFIG_H
@@ -40,15 +46,18 @@ namespace gr {
   namespace hpsdr {
 
     hermesNB::sptr
-    hermesNB::make(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+    hermesNB::make(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
+			 int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
 			 const char* MACAddr)
     {
       return gnuradio::get_initial_sptr
-        (new hermesNB_impl(RxFreq0, RxFreq1, TxFreq, RxPre, PTTModeSel, PTTTxMute,
+        (new hermesNB_impl(RxFreq0, RxFreq1, RxFreq2, RxFreq3, RxFreq4, RxFreq5,
+			RxFreq6, RxFreq7, TxFreq, RxPre, PTTModeSel, PTTTxMute,
 			PTTRxMute, TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA,
 			AlexHPF, AlexLPF, Verbose, NumRx, MACAddr));
     }
@@ -56,17 +65,20 @@ namespace gr {
     /*
      * The private constructor
      */
-    hermesNB_impl::hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+    hermesNB_impl::hermesNB_impl(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7, 
+			 int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
 			 const char* MACAddr)
       : gr::block("hermesNB",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),		// inputs to hermesNB block
-              gr::io_signature::make(1, 2, sizeof(gr_complex)) )	// outputs from hermesNB block
+              gr::io_signature::make(1, MAXRECEIVERS, sizeof(gr_complex)) )	// outputs from hermesNB block
     {
-	Hermes = new HermesProxy(RxFreq0, RxFreq1, TxFreq, RxPre, PTTModeSel, PTTTxMute,
+	Hermes = new HermesProxy(RxFreq0, RxFreq1, RxFreq2, RxFreq3, RxFreq4,
+		 RxFreq5, RxFreq6, RxFreq7, TxFreq, RxPre, PTTModeSel, PTTTxMute,
 		 PTTRxMute, TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA,
 		 AlexHPF, AlexLPF, Verbose, NumRx, MACAddr);	// Create proxy, do Hermes ethernet discovery
 	//Hermes->RxSampleRate = RxSmp;
@@ -112,6 +124,36 @@ void hermesNB::set_Receive0Frequency (float Rx0F) // callback to allow slider to
 void hermesNB::set_Receive1Frequency (float Rx1F) // callback to allow slider to set frequency
     {
 	Hermes->Receive1Frequency = (unsigned)Rx1F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive2Frequency (float Rx2F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive2Frequency = (unsigned)Rx2F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive3Frequency (float Rx3F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive3Frequency = (unsigned)Rx3F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive4Frequency (float Rx4F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive4Frequency = (unsigned)Rx4F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive5Frequency (float Rx5F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive5Frequency = (unsigned)Rx5F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive6Frequency (float Rx6F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive6Frequency = (unsigned)Rx6F;	// slider must be of type real, convert to unsigned
+    }
+
+void hermesNB::set_Receive7Frequency (float Rx7F) // callback to allow slider to set frequency
+    {
+	Hermes->Receive7Frequency = (unsigned)Rx7F;	// slider must be of type real, convert to unsigned
     }
 
 void hermesNB::set_TransmitFrequency (float TxF) // callback to allow slider to set frequency
@@ -182,12 +224,11 @@ void hermesNB::set_Verbose(int Verb)		// callback to turn Verbose mode on or off
 	Hermes->Verbose = Verb;
 }
 
-
-
 void hermesNB_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
         /* <+forecast+> e.g. ninput_items_required[0] = noutput_items */
     }
+
 
 int hermesNB_impl::general_work (int noutput_items,
                        gr_vector_int &ninput_items,
@@ -196,63 +237,39 @@ int hermesNB_impl::general_work (int noutput_items,
     {
 
        const gr_complex *in0 = (const gr_complex *) input_items[0];	// Tx samples
- //      const gr_complex *in1 = (const gr_complex *) input_items[1];	// Audio output samples
 
-       gr_complex *out0 = (gr_complex *) output_items[0];		// Rcvr 0 samples
-    
-       gr_complex *out1;						// Rcvr 1 samples
-       if (output_items.size() == 2)
-	 out1 = (gr_complex *) output_items[1];
+// Send I and Q samples received on input port to HermesProxy, it may or may not
+// consume them. Hermes needs 63 complex samples in each HPSDR-USB frame.
 
-  // We always get 128 I and 128 Q samples per request from HermesProxy, interleaved
-  // See how many 128 sample buffers we can send to Gnuradio
-
-       IQBuf_t Rx;
-       int CanSendBuffers;
-
-       if(output_items.size() == 1)
-         CanSendBuffers = noutput_items / 128;	// 128 samples per buffer - 1 Rcvr
-       else
-         CanSendBuffers = noutput_items / 64;	//  64 samples per buffer - 2 Rcvrs
-
-
-//  fprintf(stderr, "noutput_items = %d   CanSendBuffers = %d  ninput_items = %d  output_items.size = %d\n", noutput_items, CanSendBuffers, ninput_items[0], output_items.size());
-
-       int BufCount;					// # of 256-byte buffers (regardless of format)
-
-       for( BufCount=0; BufCount<CanSendBuffers; BufCount++)
+       if ((ninput_items[0] >= 63))
        {
-         if( (Rx = Hermes->GetRxIQ()) == NULL)	//no more available from the radio
-         break; 					
-
-         if (output_items.size() == 1)		// one receiver
-           for(int j=0; j<128; j++)
-             out0[(BufCount * 128) + j] = gr_complex(*Rx++, *Rx++);	// get 128 complex samples as 2 sets of 64 samples
-         else
-           for(int j=0; j<64; j++)			// two receivers
-           {
-             out0[(BufCount * 64) + j] = gr_complex(*Rx++, *Rx++);	// get 128 complex samples as 2 sets of 64 samples
-             out1[(BufCount * 64) + j] = gr_complex(*Rx++, *Rx++);
-           }
-        }
-
-  // Send I and Q samples received on input port to HermesProxy, it may or may not
-  // consume them. Hermes needs 63 complex samples in each HPSDR-USB frame.
-
-       if ((ninput_items[0] >= 63) /*&& (ninput_items[1] >= 63)*/)
-       {
-         int consumed = Hermes->PutTxIQ(in0, /*in1,*/ 63);
+         int consumed = Hermes->PutTxIQ(in0, 63);
          consume_each(consumed); // Tell runtime system how many input items we consumed on
   				 // each input stream.
        };
 
-  //fprintf(stderr, "BufCount = %d\n", BufCount);
+//
+// Get partially-filled 256-float buffers. The packing level is different dependent on the
+// number of receivers.  The buffers are sequentially packed, all receivers IQ first
+// sample then all receiver IQ second sample, etc.  The global variable USBRowCount[] tells
+// us how many time samples per receiver there are in one USB frame.
+
+	IQBuf_t Rx;
+	int NumRx = Hermes->NumReceivers;
+
+        if( (Rx = Hermes->GetRxIQ()) == NULL)	//no more available from the radio
+            return(0);				// tell gnuradio we did not produce any samples
+
+	int SamplesPerRx = Hermes->USBRowCount[NumRx-1];
+
+	// Send buffered complex samples to our block's output port(s)
+
+	for (int index=0; index<SamplesPerRx; index++)
+	    for (int receiver=0; receiver < NumRx; receiver++)
+	        ((gr_complex *)output_items[receiver])[index] = gr_complex(*Rx++, *Rx++);
 
 
-       if(output_items.size() == 1)
-         return(BufCount*128);  	// Tell gnuradio how many output items we produced per stream
-       else
-         return(BufCount*64);  	// Tell gnuradio how many output items we produced per stream
+	return(SamplesPerRx);
 
     }	// general_work
 

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2013-2015 Thomas C. McDermott, N5EG.
+ * Copyright 2013-2017 Thomas C. McDermott, N5EG.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,10 @@ namespace gr {
  * \param MACAddr MAC Address of target or * for first detected
  *
  */
-      hermesNB_impl(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+      hermesNB_impl(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
+			 int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2013-2015 Thomas C. McDermott, N5EG
+ * Copyright 2013-2017 Thomas C. McDermott, N5EG
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,10 @@ namespace gr {
        * class. hpsdr::hermesNB::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int RxFreq0, int RxFreq1, int TxFreq, bool RxPre,
-			 int PTTModeSel, bool PTTTxMute, bool PTTRxMute,
+      static sptr make(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
+			 int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
 			 unsigned char TxDr, int RxSmp, const char* Intfc, 
 			 const char * ClkS, int AlexRA, int AlexTA,
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
@@ -55,6 +57,13 @@ namespace gr {
 
       void set_Receive0Frequency(float);	// callback
       void set_Receive1Frequency(float);	// callback
+      void set_Receive2Frequency(float);	// callback
+      void set_Receive3Frequency(float);	// callback
+      void set_Receive4Frequency(float);	// callback
+      void set_Receive5Frequency(float);	// callback
+      void set_Receive6Frequency(float);	// callback
+      void set_Receive7Frequency(float);	// callback
+
       void set_TransmitFrequency(float);	// callback
       void set_RxSampRate(int);			// callback
       void set_RxPreamp(int);			// callback
