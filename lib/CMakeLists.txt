@@ -31,6 +31,8 @@ list(APPEND hpsdr_sources
 add_library(gnuradio-hpsdr SHARED ${hpsdr_sources})
 target_link_libraries(gnuradio-hpsdr ${Boost_LIBRARIES} ${GNURADIO_RUNTIME_LIBRARIES})
 set_target_properties(gnuradio-hpsdr PROPERTIES DEFINE_SYMBOL "gnuradio_hpsdr_EXPORTS")
+set_target_properties(gnuradio-hpsdr PROPERTIES SOVERSION 0)
+set_target_properties(gnuradio-hpsdr PROPERTIES VERSION 0.0.0)
 
 ########################################################################
 # Install built library files
