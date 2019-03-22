@@ -76,7 +76,7 @@ function(GR_SWIG_MAKE_DOCS output_file)
         #call the swig_doc script on the xml files
         add_custom_command(
             OUTPUT ${output_file}
-            DEPENDS ${input_files} ${OUTPUT_DIRECTORY}/xml/index.xml
+            DEPENDS ${input_files} ${stamp-file} ${OUTPUT_DIRECTORY}/xml/index.xml
             COMMAND ${PYTHON_EXECUTABLE} ${PYTHON_DASH_B}
                 ${CMAKE_SOURCE_DIR}/docs/doxygen/swig_doc.py
                 ${OUTPUT_DIRECTORY}/xml
@@ -108,17 +108,19 @@ macro(GR_SWIG_MAKE name)
     #do swig doc generation if specified
     if (GR_SWIG_DOC_FILE)
         set(GR_SWIG_DOCS_SOURCE_DEPS ${GR_SWIG_SOURCE_DEPS})
-        set(GR_SWIG_DOCS_TAREGT_DEPS ${GR_SWIG_TARGET_DEPS})
+        list(APPEND GR_SWIG_DOCS_TARGET_DEPS ${GR_SWIG_TARGET_DEPS})
         GR_SWIG_MAKE_DOCS(${GR_SWIG_DOC_FILE} ${GR_SWIG_DOC_DIRS})
-        list(APPEND GR_SWIG_SOURCE_DEPS ${GR_SWIG_DOC_FILE})
+        add_custom_target(${name}_swig_doc DEPENDS ${GR_SWIG_DOC_FILE})
+        list(APPEND GR_SWIG_TARGET_DEPS ${name}_swig_doc ${GR_RUNTIME_SWIG_DOC_FILE})
     endif()
 
     #append additional include directories
     find_package(PythonLibs 2)
     list(APPEND GR_SWIG_INCLUDE_DIRS ${PYTHON_INCLUDE_PATH}) #deprecated name (now dirs)
     list(APPEND GR_SWIG_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+    #prepend local swig directories
+    list(INSERT GR_SWIG_INCLUDE_DIRS 0 ${CMAKE_CURRENT_SOURCE_DIR})
+    list(INSERT GR_SWIG_INCLUDE_DIRS 0 ${CMAKE_CURRENT_BINARY_DIR})
 
     #determine include dependencies for swig file
     execute_process(
