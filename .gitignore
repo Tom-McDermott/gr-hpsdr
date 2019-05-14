@@ -3,6 +3,7 @@
 *.pyo
 *.json
 build/
+.vscode/
 
 
 
