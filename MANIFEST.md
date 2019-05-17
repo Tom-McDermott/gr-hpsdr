@@ -7,10 +7,10 @@ tags:
   - OpenHpsdr
 
 author: 
-  - Tom McDermott
+  - Tom McDermott, N5EG
 
 copyright_owner: 
-  - Tom McDermott
+  - Tom McDermott, N5EG
   
 repo: https://github.com/Tom-McDermott/gr-hpsdr
 website: https://github.com/Tom-McDermott/gr-hpsdr
