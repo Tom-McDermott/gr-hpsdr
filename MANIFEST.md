@@ -12,7 +12,7 @@ author:
 copyright_owner: 
   - Tom McDermott, N5EG
   
-gr_supported_version: 3.8  
+gr_supported_version: 3.8
 repo: https://github.com/Tom-McDermott/gr-hpsdr
 website: https://github.com/Tom-McDermott/gr-hpsdr
 --- 
