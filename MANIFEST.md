@@ -12,10 +12,11 @@ author:
 copyright_owner: 
   - Tom McDermott, N5EG
   
+gr_supported_version: 3.8  
 repo: https://github.com/Tom-McDermott/gr-hpsdr
 website: https://github.com/Tom-McDermott/gr-hpsdr
 --- 
-gnuradio 3.7 modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol. July 2017
+gnuradio 3.8 modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol. July 2017
 
 hermesNB sources decimated downconverted 48K-to-384K receiver complex stream(s), and sinks one 48k sample rate transmit complex stream.
 

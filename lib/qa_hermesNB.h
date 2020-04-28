@@ -18,38 +18,28 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_HPSDR_HERMESWB_H
-#define INCLUDED_HPSDR_HERMESWB_H
+#ifndef _QA_HERMESNB_H_
+#define _QA_HERMESNB_H_
 
-#include <hpsdr/api.h>
-#include <gnuradio/block.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestCase.h>
 
 namespace gr {
   namespace hpsdr {
 
-    /*!
-     * \brief <+description of block+>
-     * \ingroup hpsdr
-     *
-     */
-    class HPSDR_API hermesWB : virtual public gr::block
+    class qa_hermesNB : public CppUnit::TestCase
     {
-     public:
-      typedef boost::shared_ptr<hermesWB> sptr;
+    public:
+      CPPUNIT_TEST_SUITE(qa_hermesNB);
+      CPPUNIT_TEST(t1);
+      CPPUNIT_TEST_SUITE_END();
 
-      /*!
-       * \brief Return a shared_ptr to a new instance of hpsdr::hermesWB.
-       *
-       * To avoid accidental use of raw pointers, hpsdr::hermesWB's
-       * constructor is in a private implementation
-       * class. hpsdr::hermesWB::make is the public interface for
-       * creating new instances.
-       */
-      static sptr make();
+    private:
+      void t1();
     };
 
-  } // namespace hpsdr
-} // namespace gr
+  } /* namespace hpsdr */
+} /* namespace gr */
 
-#endif /* INCLUDED_HPSDR_HERMESWB_H */
+#endif /* _QA_HERMESNB_H_ */
 
