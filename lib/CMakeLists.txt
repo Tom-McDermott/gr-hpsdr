@@ -24,8 +24,8 @@
 include(GrPlatform) #define LIB_SUFFIX
 
 list(APPEND hpsdr_sources
-    hermesNB_impl.cc
-    hermesWB_impl.cc
+    hermesNB_impl.cc HermesProxy.cc metis.cc
+    hermesWB_impl.cc HermesProxyW.cc
 )
 
 set(hpsdr_sources "${hpsdr_sources}" PARENT_SCOPE)

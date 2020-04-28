@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2020 N5EG.
+ * Copyright 2013-2020 Thomas C. McDermott, N5EG
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,47 @@ namespace gr {
        * class. hpsdr::hermesNB::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
+			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
+			 int TxFreq, int RxPre,
+			 int PTTModeSel, int PTTTxMute, int PTTRxMute,
+			 unsigned char TxDr, int RxSmp, const char* Intfc, 
+			 const char * ClkS, int AlexRA, int AlexTA,
+			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
+			 const char* MACAddr);
+
+      void set_Receive0Frequency(float);	// callback
+      void set_Receive1Frequency(float);	// callback
+      void set_Receive2Frequency(float);	// callback
+      void set_Receive3Frequency(float);	// callback
+      void set_Receive4Frequency(float);	// callback
+      void set_Receive5Frequency(float);	// callback
+      void set_Receive6Frequency(float);	// callback
+      void set_Receive7Frequency(float);	// callback
+
+      void set_TransmitFrequency(float);	// callback
+      void set_RxSampRate(int);			// callback
+      void set_RxPreamp(int);			// callback
+      void set_PTTMode(int);			// callback
+      void set_PTTOffMutesTx(int);		// callback
+      void set_PTTOnMutesRx(int);		// callback
+      void set_TxDrive(int);			// callback
+      void set_ClockSource(const char *);	// callback
+//
+// Break up Alex Control into individual registers
+//
+      void set_AlexRxAntenna(int);		// callback
+      void set_AlexTxAntenna(int);		// callback
+      void set_AlexRxHPF(int);			// callback
+      void set_AlexTxLPF(int);			// callback
+//
+// Turn Verbose mode on / off
+//
+      void set_Verbose(int);			// callback
+
+      bool stop();				// override
+      bool start();				// override
+
     };
 
   } // namespace hpsdr

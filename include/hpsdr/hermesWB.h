@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2020 N5EG.
+ * Copyright 2013-2020 Thomas C. McDermott, N5EG
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,20 @@ namespace gr {
        * class. hpsdr::hermesWB::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(int RxPre, const char* Intfc, const char * ClkS,
+			int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
+			const char* MACAddr);
+
+      void set_RxPreamp(int);			// callback
+      void set_ClockSource(const char *);	// callback
+      void set_AlexRxAntenna(int);		// callback
+      void set_AlexTxAntenna(int);		// callback
+      void set_AlexRxHPF(int);			// callback
+      void set_AlexTxLPF(int);			// callback
+
+      bool stop();				// override
+      bool start();				// override
+
     };
 
   } // namespace hpsdr

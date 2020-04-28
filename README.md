@@ -33,8 +33,14 @@ Note: the build configuration writes files to locations prefixed with  /usr/loca
 Release Tags:
 -------------
 
+Gnuradio 3.7
+
 * v1.0 - An older version provided for backwards compatibility (for gnuradio 3.7.2 to 3.7.9, and Ubuntu 14.04).
 * v1.1 - Supports 1 or 2 receivers, gnuradio 3.7.10 and later, and Ubuntu 16.04. The buffer handling in this version is more efficient than v1.2 and later, but that may not be important in your application.
 * v1.2 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
+
+Gnuradio 3.8
+
+* v2.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
 

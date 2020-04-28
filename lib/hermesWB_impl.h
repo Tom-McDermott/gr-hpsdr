@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2020 N5EG.
+ * Copyright 2013-2020 Thomas C. McDermott, N5EG.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,20 @@ namespace gr {
       // Nothing to declare in this block.
 
      public:
-      hermesWB_impl();
+
+/*! \brief Construct a HermesWB module
+ * \param RxPre      Rx Preamp on (1) / off (0)
+ * \param Intfc  Ethernet interface to use
+ * \param ClkS   HPSDR Clock Source (register C1 when C0 = 0x00)
+ * \param AlexRA  HPSDR Alex Rx Ant Selector
+ * \param AlexTA  HPSDR Alex Tx Ant Selector
+ * \param AlexHPF  HPSDR Alex Rx High Pass Filter Selector
+ * \param AlexLPF  HPSDR Alex Tx Low Pass Filter Selector
+ *
+ */
+      hermesWB_impl(int RxPre, const char* Intfc, const char * ClkS,
+			 int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
+			 const char* MACAddr);
       ~hermesWB_impl();
 
       // Where all the action really happens
