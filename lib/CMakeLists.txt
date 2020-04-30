@@ -83,5 +83,4 @@ foreach(qa_file ${test_hpsdr_sources})
         ${CMAKE_CURRENT_SOURCE_DIR}/${qa_file}
     )
 endforeach(qa_file)
-#    ${CMAKE_CURRENT_SOURCE_DIR}/qa_hermesNB.cc    ${CMAKE_CURRENT_SOURCE_DIR}/qa_hermesWB.cc
 
