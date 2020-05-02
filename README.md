@@ -1,23 +1,47 @@
 gr-hpsdr
 ========
 
-gnuradio 3.8 modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   July 2017
+gnuradio modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   May 2020
 
 * hermesNB  sources decimated downconverted 48K-to-384K receiver complex stream(s), and sinks one 48k sample rate transmit complex stream.
 * hermesWB  sources raw ADC samples as a vector of floats, with vlen=16384. Each individual vector contains time contiguous samples. However there are large time gaps between between vectors. This is how HPSDR produces raw samples, it is due to Ethernet interface rate limitations between HPSDR and the host computer.
 
-The modules are compatible with version 3.8.x of gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR
+There are several branches, depending on which version of gnuradio you are using:
+* gr_3.7 - branch for gnuradio 3.7
+* gr_3.8 - branch for gnuradio 3.8
+* master - currently tracks gr_3.7 to support legacy PYBOMBS 3.7
+
+The modules are compatible with gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR
 protocol 1). It is not compatible with the new OpenHPSDR protocol 2.
 
-Updated to increase the maximum number of receivers to 7.  Hermes only supports 4 receivers due to limited FPGA capacity. Red Pitaya with the OpenHPSDR protocol supports 6 receivers.  Note that beyond 4 receivers and 384k sample rate exceeds 100 Mb/s Ethernet interface capacity.
-
-If no Alex module is present (just Hermes/Metis) then the Alex control fields will have no effect, and the Verbose mode will produce nonsense for Fwd and Rev power measurements, but valid Hermes FPGA revision string.
-
 It is sometimes necessary to delete all files inside the build subdirectory before re-running cmake.
+
+The gr_3.8 branch has been verified but minimally tested on Ubuntu 20.04
+
+
+To Start:
+---------
+
+	Edit ~/.profile adding these two lines:
+		export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/local/lib/python3.6/dist-packages:$PYTHONPATH
+		export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+	
+	For gr_3.8 you may need to install:
+		$ sudo apt install liborc-0.4-dev
+		$ sudo apt install swig
+		
+	You may get an error message:  x-term missing.   It is not needed, however
+	most Linux systems will have one available at:
+		/usr/bin/gnome-terminal
+	If you want, edit the configuration file to add.
+		Note that 3.7 and 3.8 have different config files.
+		
+
 
 To build:
 ---------
 
+	git checkout the_branch_you_want  (i.e. gr_3.7 or gr_3.8)
     mkdir build 
     cd build 
     cmake ..
