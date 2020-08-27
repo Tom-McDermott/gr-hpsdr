@@ -2,7 +2,7 @@
 
 id: hpsdr_hermesNB
 label: hermesNB
-category: hpsdr
+category: '[HPSDR]'
 flags:
 - throttle
 
