@@ -22,7 +22,7 @@ The gr_3.8 branch has been verified but minimally tested on Ubuntu 20.04
 To Start:
 ---------
 
-	Edit ~/.profile adding these two lines:
+	Edit ~/.profile adding these two lines (for gr_3.8):
 		export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/local/lib/python3.6/dist-packages:$PYTHONPATH
 		export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 	
@@ -40,10 +40,15 @@ To Start:
 
 To build:
 ---------
-
+     
 	git checkout the_branch_you_want  (i.e. gr_3.7 or gr_3.8)
     mkdir build 
     cd build 
+
+    NOTE: if you have already previously built gr_3.8, then you will need to
+      sudo make uninstall it before proceeding. This is because of a problem
+      with gnuradio 3.8.2 not always updating symlinks on revised builds.
+
     cmake ..
     make 
     sudo make install 
