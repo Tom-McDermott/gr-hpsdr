@@ -949,6 +949,11 @@ void HermesProxy::BuildControlRegs(unsigned RegNum, RawBuf_t outbuf)
 	    outbuf[5] = 0x00;				// C2
 	    outbuf[6] = RxCtrl | AlexRxAnt;		// C3
 	    outbuf[7] = Ctrl4 | AlexTxAnt;		// C4 - #Rx, Duplex
+
+		// branch: TestMercClock - turn on Mercury Common Frequency bit
+		// if this works (I cannot test) then add some GUI code
+		outbuf[7] = outbuf[7] | 0x80;
+
           break;
 
 	  case 2:					// Tx NCO freq (and Rx1 NCO for special case)
