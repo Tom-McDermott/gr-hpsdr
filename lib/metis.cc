@@ -172,8 +172,7 @@ static int get_addr(int sock, const char * ifname) {
             if ((addr_ptr->ifa_flags&IFF_UP) == IFF_UP &&
                 (addr_ptr->ifa_flags&IFF_RUNNING) == IFF_RUNNING) {
                 for (i=0; i < 6; i++)
-                    // maybe we should force (unsigned char *)LLADDR((struct sockaddr_dl *)
-                    hw_address[i] = addr_ptr->ifa_addr->sa_data[i];
+                    hw_address[i] = static_cast<unsigned char>(addr_ptr->ifa_addr->sa_data[i]);
                 }
                 found = true;
                 break;
