@@ -6,6 +6,16 @@ category: '[HPSDR]'
 flags:
 - throttle
 
+templates:
+  imports: import hpsdr
+  make: hpsdr.hermesNB(${RxFreq0}, ${RxFreq1}, ${RxFreq2}, ${RxFreq3}, ${RxFreq4}, ${RxFreq5}, ${RxFreq6}, ${RxFreq7}, ${TxFreq}, ${RxPre}, ${PTTModeSel}, ${PTTTxMute}, ${PTTRxMute}, ${TxDr}, ${RxSmp}, ${Intfc}, ${ClkS}, ${AlexRA}, ${AlexTA}, ${AlexHPF}, ${AlexLPF}, ${Verbose}, ${NumRx}, ${MACAddr})
+
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+
 parameters:
 -   id: Rx0F
     label: Rcvr 0 Frequency, Hz.
@@ -118,6 +128,13 @@ parameters:
     dtype: string
     default: '"*"'
 
+#  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
+#  Keys include:
+#      * label (an identifier for the GUI)
+#      * domain (optional - stream or message. Default is stream)
+#      * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#      * vlen (optional - data stream vector length. Default is 1)
+#      * optional (optional - set to 1 for optional inputs. Default is 0)
 inputs:
 -   domain: stream
     dtype: complex

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2013-2020 Thomas C. McDermott, N5EG
+ * Copyright 2013-2021 Thomas C. McDermott, N5EG
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace gr {
     class HPSDR_API hermesNB : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<hermesNB> sptr;
+      typedef std::shared_ptr<hermesNB> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of hpsdr::hermesNB.

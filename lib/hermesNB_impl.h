@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2013-2020 Thomas C. McDermott, N5EG.
+ * Copyright 2013-2021 Thomas C. McDermott, N5EG.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

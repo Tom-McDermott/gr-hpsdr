@@ -6,6 +6,16 @@ category: '[HPSDR]'
 flags:
 - throttle
 
+templates:
+  imports: import hpsdr
+  make: hpsdr.hermesWB(${RxPre}, ${Intfc}, ${ClkS}, ${AlexRA}, ${AlexTA}, ${AlexHPF}, ${AlexLPF}, ${MACAddr})
+
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+
 parameters:
 -   id: RxPre
     label: Rx Preamp Off/On
@@ -51,6 +61,12 @@ parameters:
     default: '"*"'
 
 outputs:
+#  Keys include:
+#      * label (an identifier for the GUI)
+#      * domain (optional - stream or message. Default is stream)
+#      * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#      * vlen (optional - data stream vector length. Default is 1)
+#  optional: ...
 -   domain: stream
     dtype: float
     vlen: 16384
