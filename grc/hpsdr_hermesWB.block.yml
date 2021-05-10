@@ -24,7 +24,7 @@ parameters:
 -   id: Intfc
     label: Ethernet Interface
     dtype: raw
-    default: '"eth0"'
+    default: '"enp1s0"'
 -   id: CkS
     label: HPSDR Clock Source
     dtype: raw

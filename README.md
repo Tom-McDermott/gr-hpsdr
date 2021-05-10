@@ -1,14 +1,19 @@
 gr-hpsdr
 ========
 
-gnuradio modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   May 2020
+gnuradio modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   May 2021.
 
 * hermesNB  sources decimated downconverted 48K-to-384K receiver complex stream(s), and sinks one 48k sample rate transmit complex stream.
 * hermesWB  sources raw ADC samples as a vector of floats, with vlen=16384. Each individual vector contains time contiguous samples. However there are large time gaps between between vectors. This is how HPSDR produces raw samples, it is due to Ethernet interface rate limitations between HPSDR and the host computer.
 
-There are several branches, depending on which version of gnuradio you are using:
+There are several branches, depending on which version of gnuradio you are using.
+Git checkout the branch you need.  The instrucitons for configuraing and buld ARE DIFFERRENT
+for the different vsersions.
+
 * gr_3.7 - branch for gnuradio 3.7
 * gr_3.8 - branch for gnuradio 3.8
+* gr_3.9 - branch for gnuradio 3.9
+
 * master - currently tracks gr_3.7 to support legacy PYBOMBS 3.7
 
 The modules are compatible with gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR
@@ -34,30 +39,34 @@ To Start:
 	most Linux systems will have one available at:
 		/usr/bin/gnome-terminal
 	If you want, edit the configuration file to add.
-		Note that 3.7 and 3.8 have different config files.
+		Note that 3.7, 3.8, and 3.9 have different config files.
 		
+Preparation:
+------------
+For version 3.9 you need to install pybind11.  Gnuradio 3.9.1.0 was built agaisnt pybind11 version 2.5.0.   The gnuradio wiki tells you to install 2.4.3 from tarball. DO NOT DO THAT.
+Instead:
+ $ sudo apt install pybind11-dev
+ 
+ 
 
 
 To build:
 ---------
      
-	git checkout the_branch_you_want  (i.e. gr_3.7 or gr_3.8)
+    git checkout the_branch_you_want  (i.e. gr_3.7, gr_3.8, or gr_3.9)
     mkdir build 
     cd build 
 
-    NOTE: if you have already previously built gr_3.8, then you will need to
-      sudo make uninstall it before proceeding. This is because of a problem
+    NOTE: For 3.8 only: if you have already previously built gr_3.8, then you need to
+      sudo make uninstall it before updating 3.8. This is because of a problem
       with gnuradio 3.8.2 not always updating symlinks on revised builds.
 
-    cmake ..
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr
     make 
     sudo make install 
     sudo ldconfig 
 
-Note: the build configuration writes files to locations prefixed with  /usr/local  which is appropriate for gnuradio that has been installed and built from source. If gnuradio was installed from a binary (for example using apt-get) it may expect Out-Of-Tree modules to be installed in a different location. If so the cmake command may need to be modified to change the desired installation path:
-
-    cmake .. -DCMAKE_INSTALL_PREFIX=/the-prefix-to-utilize
-
+Note: If CMAKE_INSTALL_PREFIX is not defined on the cmake line above, the build configuration will write files to locations prefixed with  /usr/local  This is appropriate for gnuradio that has been installed and built from source. If gnuradio was installed from a binary (for example using apt install) it will expect Out-Of-Tree modules to be installed in /usr.
 
 Release Tags:
 -------------
@@ -72,4 +81,6 @@ Gnuradio 3.8
 
 * v2.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
+Gnuradio 3.9
 
+* v3.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
