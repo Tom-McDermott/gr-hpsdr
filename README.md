@@ -81,5 +81,4 @@ Gnuradio 3.9
 
 * v3.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
-NOTE: Version 3.0 in github releases tab is the gnuradio 3.9 release. The git tag v3.0 points to the wrong place (perhaps to be fixed later).
 
