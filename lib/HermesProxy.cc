@@ -872,15 +872,13 @@ void HermesProxy::UpdateHermes()	// send a set of control registers to hardware 
 	BuildControlRegs(2, buffer);
 	metis_write(ep, buffer, length);
 
-	BuildControlRegs(0, buffer);
-	metis_write(ep, buffer, length);
-	BuildControlRegs(4, buffer);
-	metis_write(ep, buffer, length);
-
-	BuildControlRegs(0, buffer);
-	metis_write(ep, buffer, length);
-	BuildControlRegs(6, buffer);
-	metis_write(ep, buffer, length);
+	for(int i=0; i<NumReceivers; i++)
+	{
+		BuildControlRegs(0, buffer);
+		metis_write(ep, buffer, length);
+		BuildControlRegs(4+(2*i), buffer);
+		metis_write(ep, buffer, length);	
+	}
 
 	// Initialize the first TxBuffer (currently empty) with a valid control frame (on startup only)
 	
