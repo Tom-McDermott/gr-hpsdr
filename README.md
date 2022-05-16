@@ -44,9 +44,14 @@ To Start:
 		
 Preparation:
 ------------
-For version 3.9 and beyond you need to install pybind11.  Gnuradio 3.9.1.0 was built against pybind11 version 2.5.0.   The supported version of pybind11 has changed (and even retrograded).
-Follow the instructions on the gnuradio wiki about identifying and installing the correct version (2.5.0).
- 
+For versions 3.9 and beyond you need to mind which version of pybind11 is installed.  Gnuradio 3.9.1.0 was built against pybind11 version 2.5.0.  Ubuntu 20.04 uses pybind version 2.4.3 WHICH IS NOT COMPATIBLE.  The supported version of pybind11 retrograded in the 20.04 packages.
+
+Use the following command to see what version of pybind your gnuradio installion is using:
+$ gnuradio-config-info --pybind
+
+For version 3.10 you should use Ubuntu 22.04 Jammy Jellyfish or equivalent.  The version of
+many tools needed are correct in 22.04 while the versions in 20.04 Focal Fossa are not
+compatible.
  
 
 
@@ -84,3 +89,8 @@ Gnuradio 3.8
 Gnuradio 3.9
 
 * v3.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
+
+Gnuradio 3.10
+
+* v3.10 -  - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
+
