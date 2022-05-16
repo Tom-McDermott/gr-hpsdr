@@ -118,6 +118,9 @@ static int get_addr(int sock, const char * ifname) {
   unsigned char      *u;
   int i;
 
+  struct ifaddrs *addrs, *addr_ptr;
+  bool found = false;
+
 
 // new code to get all interface names on this host
 
@@ -160,16 +163,31 @@ static int get_addr(int sock, const char * ifname) {
 
   ip_address=inaddrr(ifr_addr.sa_data).s_addr;
 
-  if (ioctl(sock, SIOCGIFHWADDR, ifr) < 0) {
-    printf("No %s interface.\n", ifname);
+  // get address from all interfaces and filter by interface name
+  // this make the code available on Linux, *BSD and macOS
+  if (getifaddrs(&addrs) == 0) {
+      for (addr_ptr = addrs; addr_ptr != NULL; addr_ptr = addr_ptr->ifa_next) {
+        if (!strcmp(addr_ptr->ifa_name, ifname) &&
+           (addr_ptr->ifa_addr->sa_family == AF_INET || addr_ptr->ifa_addr->sa_family == AF_LOCAL)) {
+            if ((addr_ptr->ifa_flags&IFF_UP) == IFF_UP &&
+                (addr_ptr->ifa_flags&IFF_RUNNING) == IFF_RUNNING) {
+                for (i=0; i < 6; i++)
+                    hw_address[i] = static_cast<unsigned char>(addr_ptr->ifa_addr->sa_data[i]);
+                }
+                found = true;
+                break;
+            }
+        }
+      freeifaddrs(addrs);
+  } else {
+    printf("getifaddrs() error.\n");
     return -1;
   }
 
-  u = (unsigned char *) &ifr->ifr_addr.sa_data;
-
-  for(i=0;i<6;i++)
-      hw_address[i]=u[i];
-
+  if (!found) {
+      printf("No %s interface.\n", ifname);
+      return -1;
+  }
 
   return 0;
 }

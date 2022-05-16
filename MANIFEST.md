@@ -11,17 +11,20 @@ author:
 
 copyright_owner: 
   - Tom McDermott, N5EG
+
+license: GPL, Version 2 or later
   
+gr_supported_version: 3.10
 repo: https://github.com/Tom-McDermott/gr-hpsdr
 website: https://github.com/Tom-McDermott/gr-hpsdr
 --- 
-gnuradio 3.7 modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol. July 2017
+gnuradio 3.10 modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol. May 2021
 
 hermesNB sources decimated downconverted 48K-to-384K receiver complex stream(s), and sinks one 48k sample rate transmit complex stream.
 
 hermesWB sources raw ADC samples as a vector of floats, with vlen=16384. Each individual vector contains time contiguous samples. However there are large time gaps between between vectors. This is how HPSDR produces raw samples, it is due to Ethernet interface rate limitations between HPSDR and the host computer.
 
-The modules are compatible with version 3.7.x of gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR protocol 1). It is not compatible with the new OpenHPSDR protocol 2.
+The modules are compatible with version 3.9.x of gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR protocol 1). It is not compatible with the new OpenHPSDR protocol 2.
 
 Updated to increase the maximum number of receivers to 7. Hermes only supports 4 receivers due to limited FPGA capacity. Red Pitaya with the OpenHPSDR protocol supports 6 receivers. Note that beyond 4 receivers and 384k sample rate exceeds 100 Mb/s Ethernet interface capacity.
 

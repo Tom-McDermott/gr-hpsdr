@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
- * Copyright 2013 - 2017 Thomas C. McDermott, N5EG
- * 
+/*
+ * Copyright 2013-2022 Thomas C. McDermott, N5EG.
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -27,6 +27,8 @@
 //		256 sample buffers to gnuradio, rather each stream
 //		contains a smaller number of samples dependent on
 //		the number of receivers.
+//
+// April 2020 - Update to gnuradio 3.8
 // -----------------------------------------------------------------
 
 #ifdef HAVE_CONFIG_H
@@ -45,6 +47,9 @@ HermesProxy* Hermes;	// make it visible to metis.cc
 namespace gr {
   namespace hpsdr {
 
+
+    using input_type = gr_complex;
+    using output_type = gr_complex;
     hermesNB::sptr
     hermesNB::make(int RxFreq0, int RxFreq1, int RxFreq2, int RxFreq3,
 			 int RxFreq4, int RxFreq5, int RxFreq6, int RxFreq7,
@@ -55,12 +60,13 @@ namespace gr {
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
 			 const char* MACAddr)
     {
-      return gnuradio::get_initial_sptr
-        (new hermesNB_impl(RxFreq0, RxFreq1, RxFreq2, RxFreq3, RxFreq4, RxFreq5,
-			RxFreq6, RxFreq7, TxFreq, RxPre, PTTModeSel, PTTTxMute,
-			PTTRxMute, TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA,
-			AlexHPF, AlexLPF, Verbose, NumRx, MACAddr));
+      return gnuradio::make_block_sptr<hermesNB_impl>(
+        RxFreq0, RxFreq1, RxFreq2, RxFreq3, RxFreq4, RxFreq5,
+	RxFreq6, RxFreq7, TxFreq, RxPre, PTTModeSel, PTTTxMute, PTTRxMute,
+ 	TxDr, RxSmp, Intfc, ClkS, AlexRA, AlexTA, AlexHPF, AlexLPF, Verbose,
+	NumRx, MACAddr);
     }
+
 
     /*
      * The private constructor
@@ -74,8 +80,8 @@ namespace gr {
 			 int AlexHPF, int AlexLPF, int Verbose, int NumRx,
 			 const char* MACAddr)
       : gr::block("hermesNB",
-              gr::io_signature::make(1, 1, sizeof(gr_complex)),		// inputs to hermesNB block
-              gr::io_signature::make(1, MAXRECEIVERS, sizeof(gr_complex)) )	// outputs from hermesNB block
+              gr::io_signature::make(1, 1, sizeof(input_type)),		// inputs to hermesNB block
+              gr::io_signature::make(1, MAXRECEIVERS, sizeof(output_type)) )	// outputs from hermesNB block
     {
 	Hermes = new HermesProxy(RxFreq0, RxFreq1, RxFreq2, RxFreq3, RxFreq4,
 		 RxFreq5, RxFreq6, RxFreq7, TxFreq, RxPre, PTTModeSel, PTTTxMute,
@@ -236,14 +242,27 @@ int hermesNB_impl::general_work (int noutput_items,
                        gr_vector_void_star &output_items)
     {
 
-       const gr_complex *in0 = (const gr_complex *) input_items[0];	// Tx samples
+
+
+// 3.10 uses the following declarations of in, out.
+// Keep this in the code in case we have to make modifications here while debugging.
+// The 3.10 syntax uses newer C++ feature 'auto'.
+//
+//	auto in = static_cast<const input_type*>(input_items[0]);
+//	auto out = static_cast<output_type*>(output_items[0]);
+
+
+
+      const input_type *in = reinterpret_cast<const input_type*>(input_items[0]);  // Tx Samples
+      output_type *out = reinterpret_cast<output_type*>(output_items[0]); // Rx Samples
+
 
 // Send I and Q samples received on input port to HermesProxy, it may or may not
 // consume them. Hermes needs 63 complex samples in each HPSDR-USB frame.
 
        if ((ninput_items[0] >= 63))
        {
-         int consumed = Hermes->PutTxIQ(in0, 63);
+         int consumed = Hermes->PutTxIQ(in, 63);
          consume_each(consumed); // Tell runtime system how many input items we consumed on
   				 // each input stream.
        };

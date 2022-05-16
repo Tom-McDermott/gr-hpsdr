@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
- * Copyright 2013 - 2015 Thomas C. McDermott, N5EG
- * 
+/*
+ * Copyright 2013-2022 Thomas C. McDermott, N5EG.
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -39,14 +39,17 @@ HermesProxyW* HermesW;	// make it visible to metis.cc
 namespace gr {
   namespace hpsdr {
 
+    using output_type = float;
+
     hermesWB::sptr
     hermesWB::make(int RxPre, const char* Intfc, const char * ClkS,
 		   int AlexRA, int AlexTA, int AlexHPF, int AlexLPF,
 		   const char* MACAddr)
     {
-      return gnuradio::get_initial_sptr
-        (new hermesWB_impl(RxPre, Intfc, ClkS, AlexRA, AlexTA, AlexHPF, AlexLPF, MACAddr));
+      return gnuradio::make_block_sptr<hermesWB_impl>(
+        RxPre, Intfc, ClkS, AlexRA, AlexTA, AlexHPF, AlexLPF, MACAddr);
     }
+
 
     /*
      * The private constructor
@@ -131,8 +134,15 @@ int hermesWB_impl::general_work (int noutput_items,
                        gr_vector_void_star &output_items)
     {
 
-       float *out0 = (float *) output_items[0];		// WB Rcvr samples
-    
+// 3.10 changes the cast to use th new C++ auto feature. Probably works OK either way.
+// Left in here in case we need it while debugging.
+//
+//      auto in = static_cast<const input_type*>(input_items[0]);
+//      auto out = static_cast<output_type*>(output_items[0]);
+
+      output_type *out = reinterpret_cast<output_type*>(output_items[0]); // WB Rcvr samples
+
+   
   // We always get 256 Real samples per USB frame (Read buffer) from HermesProxyW
   //
   // We need to send 16,384 floats to gnuradio as one item ( a vector).
@@ -155,14 +165,14 @@ int hermesWB_impl::general_work (int noutput_items,
    // aligned and have enough Read buffers - emit one complete vector to out0[]
 
 	IQBuf_t ReadBuf = HermesW->GetCurrentRxReadBuf();
-	IQBuf_t out = out0;
+	IQBuf_t outp = out;
 
 	for (int i=0; i<64; i++)
 	{
 //	  for (int j=0; j<256; j++)
-//	    out0[i*256+j] = ReadBuf[j];
-	  memcpy(out, ReadBuf, 256*sizeof(float));
-	  out += 256;  
+//	    out[i*256+j] = ReadBuf[j];
+	  memcpy(outp, ReadBuf, 256*sizeof(float));
+	  outp += 256;  
 	  ReadBuf = HermesW->GetNextRxReadBuf();
 	}
 	return(1);
