@@ -1,15 +1,20 @@
 gr-hpsdr
 ========
 
-gnuradio modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   May 2021
+gnuradio modules for OpenHPSDR Hermes / Metis and Red Pitaya using the OpenHpsdr protocol.   May 2021.
 
 * hermesNB  sources decimated downconverted 48K-to-384K receiver complex stream(s), and sinks one 48k sample rate transmit complex stream.
 * hermesWB  sources raw ADC samples as a vector of floats, with vlen=16384. Each individual vector contains time contiguous samples. However there are large time gaps between between vectors. This is how HPSDR produces raw samples, it is due to Ethernet interface rate limitations between HPSDR and the host computer.
 
-There are several branches, depending on which version of gnuradio you are using:
+There are several branches, depending on which version of gnuradio you are using.
+Git checkout the branch you need.  The instrucitons for configuraing and buld ARE DIFFERRENT
+for the different vsersions.
+
 * gr_3.7 - branch for gnuradio 3.7
 * gr_3.8 - branch for gnuradio 3.8
 * gr_3.9 - branch for gnuradio 3.9
+* gr_3.10 - branch for gnuradio 3.10
+
 * master - currently tracks gr_3.7 to support legacy PYBOMBS 3.7
 
 The modules are compatible with gnuradio and Hermes firmware version 1.8 through 3.2 (known as OpenHPSDR
@@ -17,22 +22,19 @@ protocol 1). It is not compatible with the new OpenHPSDR protocol 2.
 
 It is sometimes necessary to delete all files inside the build subdirectory before re-running cmake.
 
+The gr_3.8 branch has been verified but minimally tested on Ubuntu 20.04
+
 
 To Start:
 ---------
 
-	You may need to edit ~/.profile adding these two lines:
+	Edit ~/.profile adding these two lines (for gr_3.8):
 		export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/local/lib/python3.6/dist-packages:$PYTHONPATH
 		export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-	or whatever python packages path is appropriate for your installation.
 	
 	For gr_3.8 you may need to install:
 		$ sudo apt install liborc-0.4-dev
 		$ sudo apt install swig
-		
-	For gr_3.9 you may need pybind11-dev installed.
-		$ sudo apt install pybind11-dev
-		$ sudo ldconfig
 		
 	You may get an error message:  x-term missing.   It is not needed, however
 	most Linux systems will have one available at:
@@ -40,26 +42,36 @@ To Start:
 	If you want, edit the configuration file to add.
 		Note that 3.7, 3.8, and 3.9 have different config files.
 		
+Preparation:
+------------
+For versions 3.9 and beyond you need to mind which version of pybind11 is installed.  Gnuradio 3.9.1.0 was built against pybind11 version 2.5.0.  Ubuntu 20.04 uses pybind version 2.4.3 WHICH IS NOT COMPATIBLE.  The supported version of pybind11 retrograded in the 20.04 packages.
+
+Use the following command to see what version of pybind your gnuradio installion is using:
+$ gnuradio-config-info --pybind
+
+For version 3.10 you should use Ubuntu 22.04 Jammy Jellyfish or equivalent.  The version of
+many tools needed are correct in 22.04 while the versions in 20.04 Focal Fossa are not
+compatible.
+ 
 
 
 To build:
 ---------
-
-	git checkout the_branch_you_want  (i.e. gr_3.7 or gr_3.8 or gr_3.9)
+     
+    git checkout the_branch_you_want  (i.e. gr_3.7, gr_3.8, or gr_3.9 or gr_3.10)
     mkdir build 
     cd build 
+
+    NOTE: For 3.8 only: if you have already previously built gr_3.8, then you need to
+      sudo make uninstall it before updating 3.8. This is because of a problem
+      with gnuradio 3.8.2 not always updating symlinks on revised builds.
+
     cmake .. -DCMAKE_INSTALL_PREFIX=/usr
     make 
     sudo make install 
     sudo ldconfig 
 
-Note: If gnuradio was installed from a binary (for example using apt-get) it may expect Out-Of-Tree modules to be installed at /usr    If gnuradio was installed and built from source
-it may expect the build configuration files at locations prefixed with  /usr/local 
-
-The cmake command may need to be modified to change the desired installation path:
-
-    cmake .. -DCMAKE_INSTALL_PREFIX=/the-prefix-to-utilize
-
+Note: If CMAKE_INSTALL_PREFIX is not defined on the cmake line above, the build configuration will write files to locations prefixed with  /usr/local  This is appropriate for gnuradio that has been installed and built from source. If gnuradio was installed from a binary (for example using apt install) it will expect Out-Of-Tree modules to be installed in /usr.
 
 Release Tags:
 -------------
@@ -74,11 +86,11 @@ Gnuradio 3.8
 
 * v2.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
-* v2.1 - modify one Linux-only system call to be compatible with BSD to enable additional OS support.
-
-
 Gnuradio 3.9
 
 * v3.0 - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
+Gnuradio 3.10
+
+* v3.10 -  - Supports 1 to 7 receivers. Your actual hardware likely supports fewer than 7 receivers. Hermes supports 4, Red Pitaya 6. More than 4 receivers / 384k requires the use of gigabit Ethernet.
 
