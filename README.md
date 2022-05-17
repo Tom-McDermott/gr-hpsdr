@@ -28,9 +28,17 @@ The gr_3.8 branch has been verified but minimally tested on Ubuntu 20.04
 To Start:
 ---------
 
-	Edit ~/.profile adding these two lines (for gr_3.8):
-		export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/local/lib/python3.6/dist-packages:$PYTHONPATH
-		export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+Edit ~/.profile adding these two lines (for gr_3.8):
+
+export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/local/lib/python3.6/dist-packages:$PYTHONPATH
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+		
+Edit ~/.profile adding these two lines (for gr_3.10 and Python 3.10):
+		
+export PYTHONPATH=/usr/local/lib/python3.10/dist-packages/gnuradio:$PYTHONPATH
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH
+
+
 	
 	For gr_3.8 you may need to install:
 		$ sudo apt install liborc-0.4-dev
